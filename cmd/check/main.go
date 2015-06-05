@@ -11,7 +11,12 @@ import (
 func main() {
 	checkRequest := decodeJSONFrom(os.Stdin)
 
-	checkResponse := versionDiffs(checkRequest)
+	checkCommand := check.NewCheckCommand(bintray.NewClient(
+		"https://api.bintray.com",
+		"jamiemonserrate",
+		"jamie-concourse"))
+
+	checkResponse := checkCommand.Execute(checkRequest)
 
 	writeToStdout(checkResponse)
 }
@@ -24,15 +29,4 @@ func decodeJSONFrom(request *os.File) check.CheckRequest {
 
 func writeToStdout(response check.CheckResponse) {
 	json.NewEncoder(os.Stdout).Encode(response)
-}
-
-func versionDiffs(checkRequest check.CheckRequest) check.CheckResponse {
-	client := bintray.NewClient("https://api.bintray.com", "jamiemonserrate", "jamie-concourse")
-	bintrayPackage := client.GetPackage("cf-artifactory")
-
-	response := check.CheckResponse{}
-	if checkRequest.Version.Number != bintrayPackage.LatestVersion {
-		response = append(response, check.Version{Number: bintrayPackage.Versions[0]})
-	}
-	return response
 }

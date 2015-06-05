@@ -3,28 +3,36 @@ package main
 import (
 	"encoding/json"
 	"os"
-	"net/http"
 
+	"github.com/jamiemonserrate/bintray-resource/bintray"
 	"github.com/jamiemonserrate/bintray-resource/check"
-
 )
 
-type VersionResponse struct {
-	LatestVersion string `json:"latest_version"`
-	Versions []string `json:"versions"`
+func main() {
+	checkRequest := decodeJSONFrom(os.Stdin)
+
+	checkResponse := versionDiffs(checkRequest)
+
+	writeToStdout(checkResponse)
 }
 
-func main(){
+func decodeJSONFrom(request *os.File) check.CheckRequest {
 	checkRequest := check.CheckRequest{}
-	json.NewDecoder(os.Stdin).Decode(&checkRequest)
-	r, _ := http.Get("https://api.bintray.com/packages/jamiemonserrate/jamie-concourse/cf-artifactory")
-	var response VersionResponse 
-	json.NewDecoder(r.Body).Decode(&response)
-	responseToReturn := check.CheckResponse{}
-	if checkRequest.Version.Number == response.LatestVersion {
-		json.NewEncoder(os.Stdout).Encode(responseToReturn)	
-	}else {
-		responseToReturn = append(responseToReturn, check.Version{Number: response.Versions[0]})
-		json.NewEncoder(os.Stdout).Encode(responseToReturn)
+	json.NewDecoder(request).Decode(&checkRequest)
+	return checkRequest
+}
+
+func writeToStdout(response check.CheckResponse) {
+	json.NewEncoder(os.Stdout).Encode(response)
+}
+
+func versionDiffs(checkRequest check.CheckRequest) check.CheckResponse {
+	client := bintray.NewClient("https://api.bintray.com", "jamiemonserrate", "jamie-concourse")
+	bintrayPackage := client.GetPackage("cf-artifactory")
+
+	response := check.CheckResponse{}
+	if checkRequest.Version.Number != bintrayPackage.LatestVersion {
+		response = append(response, check.Version{Number: bintrayPackage.Versions[0]})
 	}
+	return response
 }

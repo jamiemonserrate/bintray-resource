@@ -13,7 +13,7 @@ import (
 var _ = Describe("Client", func() {
 	var (
 		server *ghttp.Server
-		client bintray.Client
+		client *bintray.Client
 	)
 
 	BeforeEach(func() {

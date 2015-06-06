@@ -17,10 +17,20 @@ var _ = Describe("CheckCommand", func() {
 		}
 	})
 
+	It("Requests for the correct package", func() {
+
+		checkRequest := check.CheckRequest{Source: check.Source{PackageName: "awesome-package"}}
+
+		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
+		checkCommand.Execute(checkRequest)
+
+		Expect(fakeBintrayClient.PackageNameRequested).To(Equal("awesome-package"))
+	})
+
 	It("Returns empty array when the latest version is provided", func() {
 		checkRequest := check.CheckRequest{Version: check.Version{Number: "latest_version"}}
 
-		checkCommand := check.NewCheckCommand(fakeBintrayClient)
+		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 
 		Expect(checkCommand.Execute(checkRequest)).To(BeEmpty())
 	})
@@ -28,7 +38,7 @@ var _ = Describe("CheckCommand", func() {
 	It("Returns the version greater than the one provided", func() {
 		checkRequest := check.CheckRequest{Version: check.Version{Number: "previous_version"}}
 
-		checkCommand := check.NewCheckCommand(fakeBintrayClient)
+		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 
 		Expect(checkCommand.Execute(checkRequest)).To(Equal(check.CheckResponse{check.Version{Number: "latest_version"}}))
 	})

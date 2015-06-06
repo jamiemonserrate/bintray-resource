@@ -2,11 +2,18 @@ package check
 
 import "github.com/jamiemonserrate/bintray-resource/bintray"
 
+type Source struct {
+	SubjectName string `json:"subject_name"`
+	RepoName    string `json:"repo_name"`
+	PackageName string `json:"package_name"`
+}
+
 type Version struct {
 	Number string `json:"number"`
 }
 
 type CheckRequest struct {
+	Source  Source  `json:"source"`
 	Version Version `json:"version"`
 }
 
@@ -21,7 +28,7 @@ func NewCheckCommand(bintrayClient bintray.BintrayClient) CheckCommand {
 }
 
 func (checkCommand *CheckCommand) Execute(checkRequest CheckRequest) CheckResponse {
-	bintrayPackage := checkCommand.bintrayClient.GetPackage("cf-artifactory")
+	bintrayPackage := checkCommand.bintrayClient.GetPackage(checkRequest.Source.PackageName)
 
 	response := CheckResponse{}
 	if checkRequest.Version.Number != bintrayPackage.LatestVersion {

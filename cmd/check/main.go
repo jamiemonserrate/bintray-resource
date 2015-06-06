@@ -12,9 +12,9 @@ func main() {
 	checkRequest := decodeJSONFrom(os.Stdin)
 
 	checkCommand := check.NewCheckCommand(bintray.NewClient(
-		"https://api.bintray.com",
-		"jamiemonserrate",
-		"jamie-concourse"))
+		bintray.URL,
+		checkRequest.Source.SubjectName,
+		checkRequest.Source.RepoName))
 
 	checkResponse := checkCommand.Execute(checkRequest)
 

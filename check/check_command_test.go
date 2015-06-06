@@ -12,14 +12,13 @@ var _ = Describe("CheckCommand", func() {
 
 	BeforeEach(func() {
 		fakeBintrayClient = fakes.BintrayClient{
-			LatestVersionToReturn: "1.0.0",
-			VersionsToReturn:      []string{"1.0.0", "0.0.2", "0.0.1"},
+			VersionsToReturn: []string{"1.0.0", "0.0.2", "0.0.1"},
 		}
 	})
 
 	It("Requests for the correct package", func() {
 		checkRequest := check.CheckRequest{Source: check.Source{PackageName: "awesome-package"},
-			Version: check.Version{Number: "1.0.0"}}
+			RawVersion: check.Version{Number: "1.0.0"}}
 
 		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 		checkCommand.Execute(checkRequest)
@@ -28,7 +27,7 @@ var _ = Describe("CheckCommand", func() {
 	})
 
 	It("Returns empty array when the latest version is provided", func() {
-		checkRequest := check.CheckRequest{Version: check.Version{Number: "1.0.0"}}
+		checkRequest := check.CheckRequest{RawVersion: check.Version{Number: "1.0.0"}}
 
 		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 
@@ -36,7 +35,7 @@ var _ = Describe("CheckCommand", func() {
 	})
 
 	It("Returns all versions greater than the one provided", func() {
-		checkRequest := check.CheckRequest{Version: check.Version{Number: "0.0.1"}}
+		checkRequest := check.CheckRequest{RawVersion: check.Version{Number: "0.0.1"}}
 
 		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 

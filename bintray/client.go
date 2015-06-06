@@ -14,11 +14,6 @@ type Client struct {
 	repoName    string
 }
 
-type Package struct {
-	LatestVersion string   `json:"latest_version"`
-	Versions      []string `json:"versions"`
-}
-
 type BintrayClient interface {
 	GetPackage(string) Package
 }

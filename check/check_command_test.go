@@ -12,14 +12,14 @@ var _ = Describe("CheckCommand", func() {
 
 	BeforeEach(func() {
 		fakeBintrayClient = fakes.BintrayClient{
-			LatestVersionToReturn: "latest_version",
-			VersionsToReturn:      []string{"latest_version", "previous_version"},
+			LatestVersionToReturn: "1.0.0",
+			VersionsToReturn:      []string{"1.0.0", "0.0.2", "0.0.1"},
 		}
 	})
 
 	It("Requests for the correct package", func() {
-
-		checkRequest := check.CheckRequest{Source: check.Source{PackageName: "awesome-package"}}
+		checkRequest := check.CheckRequest{Source: check.Source{PackageName: "awesome-package"},
+			Version: check.Version{Number: "1.0.0"}}
 
 		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 		checkCommand.Execute(checkRequest)
@@ -28,18 +28,20 @@ var _ = Describe("CheckCommand", func() {
 	})
 
 	It("Returns empty array when the latest version is provided", func() {
-		checkRequest := check.CheckRequest{Version: check.Version{Number: "latest_version"}}
+		checkRequest := check.CheckRequest{Version: check.Version{Number: "1.0.0"}}
 
 		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 
 		Expect(checkCommand.Execute(checkRequest)).To(BeEmpty())
 	})
 
-	It("Returns the version greater than the one provided", func() {
-		checkRequest := check.CheckRequest{Version: check.Version{Number: "previous_version"}}
+	It("Returns all versions greater than the one provided", func() {
+		checkRequest := check.CheckRequest{Version: check.Version{Number: "0.0.1"}}
 
 		checkCommand := check.NewCheckCommand(&fakeBintrayClient)
 
-		Expect(checkCommand.Execute(checkRequest)).To(Equal(check.CheckResponse{check.Version{Number: "latest_version"}}))
+		Expect(checkCommand.Execute(checkRequest)).To(Equal(check.CheckResponse{
+			check.Version{Number: "1.0.0"},
+			check.Version{Number: "0.0.2"}}))
 	})
 })

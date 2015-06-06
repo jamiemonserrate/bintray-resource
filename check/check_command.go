@@ -1,6 +1,9 @@
 package check
 
-import "github.com/jamiemonserrate/bintray-resource/bintray"
+import (
+	"github.com/hashicorp/go-version"
+	"github.com/jamiemonserrate/bintray-resource/bintray"
+)
 
 type Source struct {
 	SubjectName string `json:"subject_name"`
@@ -31,8 +34,18 @@ func (checkCommand *CheckCommand) Execute(checkRequest CheckRequest) CheckRespon
 	bintrayPackage := checkCommand.bintrayClient.GetPackage(checkRequest.Source.PackageName)
 
 	response := CheckResponse{}
-	if checkRequest.Version.Number != bintrayPackage.LatestVersion {
-		response = append(response, Version{Number: bintrayPackage.Versions[0]})
+	if toVersion(checkRequest.Version.Number).LessThan(toVersion(bintrayPackage.LatestVersion)) {
+		for _, bintrayVersion := range bintrayPackage.Versions {
+			v, _ := version.NewVersion(bintrayVersion)
+			if v.GreaterThan(toVersion(checkRequest.Version.Number)) {
+				response = append(response, Version{Number: bintrayVersion})
+			}
+		}
 	}
 	return response
+}
+
+func toVersion(versionString string) *version.Version {
+	version, _ := version.NewVersion(versionString)
+	return version
 }

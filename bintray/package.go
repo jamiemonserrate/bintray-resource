@@ -1,6 +1,10 @@
 package bintray
 
-import "github.com/hashicorp/go-version"
+import (
+	"sort"
+
+	"github.com/hashicorp/go-version"
+)
 
 type Package struct {
 	RawVersions []string `json:"versions"`
@@ -14,5 +18,7 @@ func (bintrayPackage *Package) VersionsSince(minVersion *version.Version) []*ver
 			versionsToReturn = append(versionsToReturn, v)
 		}
 	}
+
+	sort.Sort(sort.Reverse(version.Collection(versionsToReturn)))
 	return versionsToReturn
 }

@@ -18,5 +18,15 @@ var _ = Describe("Package", func() {
 			expectedVersion3, _ := version.NewVersion("3.3.3")
 			Expect(bintrayPackage.VersionsSince(version1)).To(Equal([]*version.Version{expectedVersion3, expectedVersion2}))
 		})
+
+		It("Returns all versions in sorted order", func() {
+			bintrayPackage := bintray.Package{RawVersions: []string{"4.4.4", "2.2.2", "1.1.1", "3.3.3"}}
+
+			version1, _ := version.NewVersion("1.1.1")
+			expectedVersion2, _ := version.NewVersion("2.2.2")
+			expectedVersion3, _ := version.NewVersion("3.3.3")
+			expectedVersion4, _ := version.NewVersion("4.4.4")
+			Expect(bintrayPackage.VersionsSince(version1)).To(Equal([]*version.Version{expectedVersion4, expectedVersion3, expectedVersion2}))
+		})
 	})
 })

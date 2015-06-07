@@ -42,6 +42,14 @@ var _ = Describe("check", func() {
 
 		Expect(response).To(Equal(check.CheckResponse{{Number: "2.1.1"}}))
 	})
+
+	It("returns only the latest version if input is empty", func() {
+		response := execCheckCommandWith(check.CheckRequest{
+			Source: check.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
+		})
+
+		Expect(response).To(Equal(check.CheckResponse{{Number: "2.1.1"}}))
+	})
 })
 
 func execCheckCommandWith(checkRequest check.CheckRequest) check.CheckResponse {

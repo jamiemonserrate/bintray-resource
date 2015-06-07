@@ -28,5 +28,12 @@ var _ = Describe("Package", func() {
 			expectedVersion4, _ := version.NewVersion("4.4.4")
 			Expect(bintrayPackage.VersionsSince(version1)).To(Equal([]*version.Version{expectedVersion4, expectedVersion3, expectedVersion2}))
 		})
+
+		It("Returns only latest version if none provided", func() {
+			bintrayPackage := bintray.Package{RawVersions: []string{"4.4.4", "2.2.2", "1.1.1", "3.3.3"}, RawLatestVersion: "4.4.4"}
+
+			expectedVersion, _ := version.NewVersion("4.4.4")
+			Expect(bintrayPackage.VersionsSince(nil)).To(Equal([]*version.Version{expectedVersion}))
+		})
 	})
 })

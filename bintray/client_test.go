@@ -28,7 +28,8 @@ var _ = Describe("Client", func() {
 	Context(".GetVersions", func() {
 		It("returns the versions", func() {
 			expectedPackage := bintray.Package{
-				RawVersions: []string{"6.6.6", "5.5.5"},
+				RawVersions:      []string{"6.6.6", "5.5.5"},
+				RawLatestVersion: "6.6.6",
 			}
 
 			server.AppendHandlers(ghttp.CombineHandlers(

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -56,9 +57,11 @@ func (client *Client) DownloadPackage(packageName, version, destinationDir strin
 }
 
 func (client *Client) getPackageURL(packageName string) string {
-	return fmt.Sprintf("%s/packages/%s/%s/%s", client.url, client.subjectName, client.repoName, packageName)
+	getPackagePath := path.Join("packages", client.subjectName, client.repoName, packageName)
+	return fmt.Sprintf("%s/%s", client.url, getPackagePath)
 }
 
 func (client *Client) inPackageURL(packageName, version string) string {
-	return fmt.Sprintf("%s/%s/%s/%s/%s", client.url, client.subjectName, client.repoName, version, packageName)
+	downloadPackagePath := path.Join(client.subjectName, client.repoName, version, packageName)
+	return fmt.Sprintf("%s/%s", client.url, downloadPackagePath)
 }

@@ -27,20 +27,20 @@ var _ = Describe("check", func() {
 
 	It("returns empty array if the version provided is the latest", func() {
 		response := execCheckCommandWith(check.CheckRequest{
-			RawVersion: check.Version{Number: "2.1.1"},
+			RawVersion: check.Version{Number: "2.2.3"},
 			Source:     check.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
 		})
 
 		Expect(response).To(BeEmpty())
 	})
 
-	It("returns the version when there is a version greater than the input", func() {
+	It("returns all versions greater than provided version", func() {
 		response := execCheckCommandWith(check.CheckRequest{
 			RawVersion: check.Version{Number: "2.1.0"},
 			Source:     check.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
 		})
 
-		Expect(response).To(Equal(check.CheckResponse{{Number: "2.1.1"}}))
+		Expect(response).To(Equal(check.CheckResponse{{Number: "2.2.3"}, {Number: "2.2.2"}, {Number: "2.1.1"}}))
 	})
 
 	It("returns only the latest version if input is empty", func() {
@@ -48,7 +48,7 @@ var _ = Describe("check", func() {
 			Source: check.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
 		})
 
-		Expect(response).To(Equal(check.CheckResponse{{Number: "2.1.1"}}))
+		Expect(response).To(Equal(check.CheckResponse{{Number: "2.2.3"}}))
 	})
 })
 

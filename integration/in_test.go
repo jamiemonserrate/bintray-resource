@@ -37,7 +37,7 @@ var _ = Describe("in", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	FIt("Downloads file for the version", func() {
+	It("Downloads file for the version", func() {
 		response := execInCommandWith(in.InRequest{
 			RawVersion: in.Version{Number: "2.2.3"},
 			Source:     in.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},

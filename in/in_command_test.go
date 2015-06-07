@@ -31,15 +31,16 @@ var _ = Describe("InCommand", func() {
 	})
 
 	It("Downloads the correct package", func() {
+		destDir := filepath.Join(destRootDir, "on-the-moon")
 		inRequest := in.InRequest{Source: in.Source{PackageName: "awesome-package"},
 			RawVersion: in.Version{Number: "1.0.0"}}
 
 		inCommand := in.NewInCommand(&fakeBintrayClient)
-		inCommand.Execute(inRequest, "on-the-moon")
+		inCommand.Execute(inRequest, destDir)
 
 		Expect(fakeBintrayClient.PackageNameRequested).To(Equal("awesome-package"))
 		Expect(fakeBintrayClient.VersionRequested).To(Equal("1.0.0"))
-		Expect(fakeBintrayClient.DestinationDirRequested).To(Equal("on-the-moon"))
+		Expect(fakeBintrayClient.DestinationDirRequested).To(Equal(destDir))
 	})
 
 	It("Creates the directory", func() {

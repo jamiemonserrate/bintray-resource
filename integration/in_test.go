@@ -29,7 +29,6 @@ var _ = Describe("in", func() {
 		inPath, err = gexec.Build("github.com/jamiemonserrate/bintray-resource/cmd/in")
 		Expect(err).NotTo(HaveOccurred())
 		destDir, err = ioutil.TempDir("", "bintray-resource-integration-test")
-		Expect(err).NotTo(HaveOccurred())
 	})
 
 	AfterEach(func() {
@@ -48,7 +47,7 @@ var _ = Describe("in", func() {
 		Expect(filepath.Join(destDir, "cf-artifactory")).To(BeARegularFile())
 		contents, err := ioutil.ReadFile(filepath.Join(destDir, "cf-artifactory"))
 		Expect(err).ToNot(HaveOccurred())
-		Expect(contents).ToNot(Equal([]byte("This is the content")))
+		Expect(contents).To(Equal([]byte("These contents are valid\n")))
 	})
 })
 

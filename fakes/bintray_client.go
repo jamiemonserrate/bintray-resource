@@ -19,3 +19,10 @@ func (fakeBintrayClient *BintrayClient) DownloadPackage(packageName, version, de
 	fakeBintrayClient.VersionRequested = version
 	fakeBintrayClient.DestinationDirRequested = destinationDir
 }
+
+func (fakeBintrayClient *BintrayClient) UploadPackage(packageName, version, destinationDir string) error {
+	// fakeBintrayClient.PackageNameRequested = packageName
+	// fakeBintrayClient.VersionRequested = version
+	// fakeBintrayClient.DestinationDirRequested = destinationDir
+	return nil
+}

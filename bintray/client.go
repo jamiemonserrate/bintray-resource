@@ -46,12 +46,7 @@ func (client *Client) GetPackage(packageName string) (*Package, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		errorResponse := ErrorResponse{}
-		errorString, _ := ioutil.ReadAll(response.Body)
-		if err = json.NewDecoder(bytes.NewReader(errorString)).Decode(&errorResponse); err != nil {
-			return nil, errors.New(string(errorString))
-		}
-		return nil, errors.New(errorResponse.Message)
+		return nil, client.parseErrorFrom(response)
 	}
 
 	var bintrayPackage *Package
@@ -78,16 +73,10 @@ func (client *Client) DownloadPackage(packageName, version, destinationDir strin
 	if err != nil {
 		return err
 	}
-	if response.StatusCode != http.StatusOK {
-		errorResponse := ErrorResponse{}
-		errorString, _ := ioutil.ReadAll(response.Body)
-		if err = json.NewDecoder(bytes.NewReader(errorString)).Decode(&errorResponse); err != nil {
-			return errors.New(string(errorString))
-		}
-
-		return errors.New(errorResponse.Message)
-	}
 	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return client.parseErrorFrom(response)
+	}
 	_, err = io.Copy(downloadedFile, response.Body)
 	return err
 }
@@ -131,4 +120,13 @@ func (client *Client) deleteVersionURL(packageName, version string) string {
 func (client *Client) outPackageURL(packageName, version string) string {
 	uploadPackagePath := path.Join("content", client.subjectName, client.repoName, packageName, version, version+"/"+packageName)
 	return fmt.Sprintf("%s/%s?publish=1", client.url, uploadPackagePath)
+}
+
+func (client *Client) parseErrorFrom(response *http.Response) error {
+	errorResponse := ErrorResponse{}
+	errorString, _ := ioutil.ReadAll(response.Body)
+	if err := json.NewDecoder(bytes.NewReader(errorString)).Decode(&errorResponse); err != nil {
+		return errors.New(string(errorString))
+	}
+	return errors.New(errorResponse.Message)
 }

@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 )
 
-const URL string = "https://api.bintray.com"
+const DownloadURL string = "https://dl.bintray.com"
+const APIURL string = "https://api.bintray.com"
 
 type Client struct {
 	url         string

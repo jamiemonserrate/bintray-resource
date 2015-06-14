@@ -12,7 +12,7 @@ func main() {
 	outRequest := decodeJSONFrom(os.Stdin)
 
 	outCommand := out.NewOutCommand(bintray.NewClient(
-		"https://api.bintray.com",
+		bintray.APIURL,
 		outRequest.Source.SubjectName,
 		outRequest.Source.RepoName,
 		outRequest.Source.Username,

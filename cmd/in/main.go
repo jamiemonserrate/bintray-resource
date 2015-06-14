@@ -12,7 +12,7 @@ func main() {
 	inRequest := decodeJSONFrom(os.Stdin)
 
 	inCommand := in.NewInCommand(bintray.NewClient(
-		"https://dl.bintray.com",
+		bintray.DownloadURL,
 		inRequest.Source.SubjectName,
 		inRequest.Source.RepoName,
 		inRequest.Source.Username,

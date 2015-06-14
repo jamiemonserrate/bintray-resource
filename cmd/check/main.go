@@ -12,7 +12,7 @@ func main() {
 	checkRequest := decodeJSONFrom(os.Stdin)
 
 	checkCommand := check.NewCheckCommand(bintray.NewClient(
-		bintray.URL,
+		bintray.APIURL,
 		checkRequest.Source.SubjectName,
 		checkRequest.Source.RepoName,
 		checkRequest.Source.Username,

@@ -2,6 +2,7 @@ package bintray
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,10 +22,14 @@ type Client struct {
 	password    string
 }
 
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
 type BintrayClient interface {
-	GetPackage(string) Package
-	DownloadPackage(string, string, string)
-	UploadPackage(string, string, string) error
+	GetPackage(packageName string) (*Package, error)
+	DownloadPackage(packageName, version, destinationDir string) error
+	UploadPackage(packageName, from, version string) error
 }
 
 func NewClient(bintrayURL, subjectName, repoName, username, password string) *Client {
@@ -32,12 +37,26 @@ func NewClient(bintrayURL, subjectName, repoName, username, password string) *Cl
 		username: username, password: password}
 }
 
-func (client *Client) GetPackage(packageName string) Package {
-	var bintrayPackage Package
-	response, _ := http.Get(client.getPackageURL(packageName))
+func (client *Client) GetPackage(packageName string) (*Package, error) {
+	response, err := http.Get(client.getPackageURL(packageName))
+	if err != nil {
+		return nil, err
+	}
 	defer response.Body.Close()
-	json.NewDecoder(response.Body).Decode(&bintrayPackage)
-	return bintrayPackage
+	if response.StatusCode != http.StatusOK {
+		errorResponse := ErrorResponse{}
+		if err := json.NewDecoder(response.Body).Decode(&errorResponse); err != nil {
+			return nil, err
+		}
+		return nil, errors.New(errorResponse.Message)
+	}
+
+	var bintrayPackage *Package
+	if err := json.NewDecoder(response.Body).Decode(&bintrayPackage); err != nil {
+		return nil, err
+	}
+
+	return bintrayPackage, nil
 }
 
 func (client *Client) DownloadPackage(packageName, version, destinationDir string) {

@@ -38,7 +38,7 @@ var _ = Describe("Client", func() {
 
 	Context(".GetPackage", func() {
 		It("returns the versions", func() {
-			expectedPackage := bintray.Package{
+			expectedPackage := &bintray.Package{
 				RawVersions:      []string{"6.6.6", "5.5.5"},
 				RawLatestVersion: "6.6.6",
 			}
@@ -48,10 +48,60 @@ var _ = Describe("Client", func() {
 				ghttp.RespondWithJSONEncoded(http.StatusOK, expectedPackage),
 			))
 
-			bintrayPackage := client.GetPackage("package_name")
+			bintrayPackage, err := client.GetPackage("package_name")
 
+			Expect(err).ToNot(HaveOccurred())
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 			Expect(bintrayPackage).To(Equal(expectedPackage))
+		})
+
+		Context("returns the error", func() {
+			It("if bintray returns error", func() {
+				client = bintray.NewClient("some-invalid-url", "doesntmatter", "doesntmatter", "doesntmatter", "doesntmatter")
+
+				bintrayPackage, err := client.GetPackage("package_name")
+
+				Expect(bintrayPackage).To(BeNil())
+				Expect(err).To(MatchError(ContainSubstring("unsupported protocol scheme")))
+			})
+
+			It("if bintray returns a non 200 status code with a valid error message", func() {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.RespondWithJSONEncoded(http.StatusNotFound, bintray.ErrorResponse{Message: "The requested path was not found"}),
+				))
+
+				bintrayPackage, err := client.GetPackage("package_name")
+
+				Expect(bintrayPackage).To(BeNil())
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(Equal("The requested path was not found"))
+			})
+
+			Context("when Response cannot be parsed", func() {
+				It("returns error for 200 status code", func() {
+					server.AppendHandlers(ghttp.CombineHandlers(
+						ghttp.RespondWithJSONEncoded(http.StatusOK, "something we dont expect"),
+					))
+
+					bintrayPackage, err := client.GetPackage("package_name")
+
+					Expect(bintrayPackage).To(BeNil())
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(Equal("json: cannot unmarshal string into Go value of type bintray.Package"))
+				})
+
+				It("returns error for non 200 status code", func() {
+					server.AppendHandlers(ghttp.CombineHandlers(
+						ghttp.RespondWithJSONEncoded(http.StatusInternalServerError, "something we dont expect"),
+					))
+
+					bintrayPackage, err := client.GetPackage("package_name")
+
+					Expect(bintrayPackage).To(BeNil())
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(Equal("json: cannot unmarshal string into Go value of type bintray.ErrorResponse"))
+				})
+			})
 		})
 	})
 

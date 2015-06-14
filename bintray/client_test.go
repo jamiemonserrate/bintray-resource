@@ -1,7 +1,6 @@
 package bintray_test
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -216,7 +215,6 @@ var _ = Describe("Client", func() {
 			))
 
 			err = client.UploadPackage("doesntmatter", fileToUploadPath, "doesntmatter")
-			fmt.Println(err.Error())
 
 			Expect(err).To(MatchError("The requested path was not found"))
 		})
@@ -231,7 +229,6 @@ var _ = Describe("Client", func() {
 			))
 
 			err = client.UploadPackage("doesntmatter", fileToUploadPath, "doesntmatter")
-			fmt.Println(err.Error())
 
 			Expect(err).To(MatchError("Server down"))
 		})
@@ -249,6 +246,36 @@ var _ = Describe("Client", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		Context("handles errors", func() {
+			It("if bintray returns error", func() {
+				client = bintray.NewClient("some-invalid-url", "doesntmatter", "doesntmatter", "doesntmatter", "doesntmatter")
+
+				err = client.DeleteVersion("package_name", "version")
+
+				Expect(err).To(MatchError(ContainSubstring("unsupported protocol scheme")))
+			})
+
+			It("if bintray returns a non 201 status code with a valid error message", func() {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.RespondWithJSONEncoded(http.StatusNotFound, bintray.ErrorResponse{Message: "The requested path was not found"}),
+				))
+
+				err = client.DeleteVersion("package_name", "version")
+
+				Expect(err).To(MatchError("The requested path was not found"))
+			})
+
+			It("if bintray returns a non 201 status code with a invalid JSON", func() {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.RespondWith(http.StatusNotFound, "Server down"),
+				))
+
+				err = client.DeleteVersion("package_name", "version")
+
+				Expect(err).To(MatchError("Server down"))
+			})
 		})
 	})
 })

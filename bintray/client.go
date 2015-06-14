@@ -82,11 +82,21 @@ func (client *Client) DownloadPackage(packageName, version, destinationDir strin
 }
 
 func (client *Client) DeleteVersion(packageName, version string) error {
-	req, _ := http.NewRequest("DELETE", client.deleteVersionURL(packageName, version), nil)
-	req.SetBasicAuth(client.username, client.password)
-	c := &http.Client{}
-	_, err := c.Do(req)
-	return err
+	request, err := http.NewRequest("DELETE", client.deleteVersionURL(packageName, version), nil)
+	if err != nil {
+		return err
+	}
+	request.SetBasicAuth(client.username, client.password)
+	httpClient := &http.Client{}
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return client.parseErrorFrom(response)
+	}
+	return nil
 }
 
 func (client *Client) UploadPackage(packageName, from, version string) error {

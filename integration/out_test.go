@@ -50,7 +50,8 @@ var _ = Describe("out", func() {
 		err := os.RemoveAll(inputDir)
 		Expect(err).ToNot(HaveOccurred())
 
-		bintrayClient.DeleteVersion(packageName, expectedVersion)
+		err = bintrayClient.DeleteVersion(packageName, expectedVersion)
+		Expect(err).ToNot(HaveOccurred())
 	})
 
 	It("uploads the file and returns version in the response", func() {

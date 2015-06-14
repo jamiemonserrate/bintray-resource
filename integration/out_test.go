@@ -17,64 +17,52 @@ import (
 )
 
 var (
-	err      error
-	outPath  string
-	inputDir string
+	err                error
+	outPath            string
+	inputDir           string
+	versionFilePath    string
+	fileToUploadPath   string
+	bintrayUsername    = "jamiemonserrate"
+	bintrayAPIKey      = "9dd0d7a78b11e773ef4dbc389cf36c1cfe536ebc"
+	bintraySubjectName = "jamiemonserrate"
+	bintrayRepoName    = "jamie-concourse"
+	packageName        = "cf-artifactory"
+	expectedVersion    = "2.2.5"
 )
 
 var _ = Describe("out", func() {
+	var bintrayClient *bintray.Client
 
 	BeforeEach(func() {
 		outPath, err = gexec.Build("github.com/jamiemonserrate/bintray-resource/cmd/out")
 		Expect(err).NotTo(HaveOccurred())
+
 		inputDir, err = ioutil.TempDir("", "bintray-resource-outtegration-test")
-		abintrayClient := bintray.NewClient(
-			"https://api.bintray.com",
-			"jamiemonserrate",
-			"jamie-concourse",
-			"jamiemonserrate",
-			"9dd0d7a78b11e773ef4dbc389cf36c1cfe536ebc")
-		abintrayClient.DeleteVersion("cf-artifactory", "2.2.5")
+		versionFilePath = filepath.Join(inputDir, "number")
+		fileToUploadPath = filepath.Join(inputDir, "fileToUpload.txt")
+		bintrayClient = newAPIClient()
+
+		bintrayClient.DeleteVersion(packageName, expectedVersion)
 	})
 
 	AfterEach(func() {
 		err := os.RemoveAll(inputDir)
 		Expect(err).ToNot(HaveOccurred())
+
+		bintrayClient.DeleteVersion(packageName, expectedVersion)
 	})
 
-	It("uploads the file", func() {
-		ioutil.WriteFile(filepath.Join(inputDir, "fileToUpload.txt"), []byte("some-content"), 0755)
-		versionFilePath := filepath.Join(inputDir, "number")
-		ioutil.WriteFile(versionFilePath, []byte("2.2.5"), 0755)
-		response := executeCommandWith(out.OutRequest{
-			From:        filepath.Join(inputDir, "fileToUpload.txt"),
-			VersionFile: versionFilePath,
-			Source: out.Source{SubjectName: "jamiemonserrate",
-				RepoName:    "jamie-concourse",
-				PackageName: "cf-artifactory",
-				Username:    "jamiemonserrate",
-				APIKey:      "9dd0d7a78b11e773ef4dbc389cf36c1cfe536ebc"},
-		})
+	It("uploads the file and returns version in the response", func() {
+		ioutil.WriteFile(fileToUploadPath, []byte("some-content"), 0755)
+		ioutil.WriteFile(versionFilePath, []byte(expectedVersion), 0755)
 
-		Expect(response).To(Equal(out.OutResponse{Version: out.Version{Number: "2.2.5"}}))
-		downloadDir, err := ioutil.TempDir("", "bintray-resource-outtegration-test-download")
-		Expect(err).ToNot(HaveOccurred())
-		bintrayClient := bintray.NewClient(
-			"https://dl.bintray.com",
-			"jamiemonserrate",
-			"jamie-concourse",
-			"jamiemonserrate",
-			"9dd0d7a78b11e773ef4dbc389cf36c1cfe536ebc")
-		bintrayClient.DownloadPackage("cf-artifactory", "2.2.5", downloadDir)
-		contents, err := ioutil.ReadFile(filepath.Join(downloadDir, "cf-artifactory"))
-		Expect(contents).To(Equal([]byte("some-content")))
-		abintrayClient := bintray.NewClient(
-			"https://api.bintray.com",
-			"jamiemonserrate",
-			"jamie-concourse",
-			"jamiemonserrate",
-			"9dd0d7a78b11e773ef4dbc389cf36c1cfe536ebc")
-		abintrayClient.DeleteVersion("cf-artifactory", "2.2.5")
+		response := executeCommandWith(out.OutRequest{
+			From:        fileToUploadPath,
+			VersionFile: versionFilePath,
+			Source:      source()})
+
+		Expect(response).To(Equal(out.OutResponse{Version: out.Version{Number: expectedVersion}}))
+		Expect(downloadAndReadContentsOf(packageName, expectedVersion)).To(Equal("some-content"))
 	})
 })
 
@@ -101,4 +89,38 @@ func decodeOutResponse(encodedResponse []byte) out.OutResponse {
 	err := json.NewDecoder(bytes.NewBuffer(encodedResponse)).Decode(&decodedResponse)
 	Expect(err).ToNot(HaveOccurred())
 	return decodedResponse
+}
+
+func newAPIClient() *bintray.Client {
+	return bintray.NewClient(
+		bintray.APIURL,
+		bintraySubjectName,
+		bintrayRepoName,
+		bintrayUsername,
+		bintrayAPIKey)
+}
+
+func source() out.Source {
+	return out.Source{SubjectName: bintraySubjectName,
+		RepoName:    bintrayRepoName,
+		PackageName: packageName,
+		Username:    bintrayUsername,
+		APIKey:      bintrayAPIKey}
+}
+
+func downloadAndReadContentsOf(packageName, version string) string {
+	downloadDir, err := ioutil.TempDir("", "bintray-resource-outtegration-test-download")
+	Expect(err).ToNot(HaveOccurred())
+
+	bintrayClient := bintray.NewClient(
+		bintray.DownloadURL,
+		bintraySubjectName,
+		bintrayRepoName,
+		bintrayUsername,
+		bintrayAPIKey)
+	bintrayClient.DownloadPackage(packageName, version, downloadDir)
+	contents, err := ioutil.ReadFile(filepath.Join(downloadDir, packageName))
+	Expect(err).ToNot(HaveOccurred())
+
+	return string(contents)
 }

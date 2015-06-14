@@ -14,7 +14,9 @@ func main() {
 	checkCommand := check.NewCheckCommand(bintray.NewClient(
 		bintray.URL,
 		checkRequest.Source.SubjectName,
-		checkRequest.Source.RepoName))
+		checkRequest.Source.RepoName,
+		checkRequest.Source.Username,
+		checkRequest.Source.APIKey))
 
 	checkResponse := checkCommand.Execute(checkRequest)
 

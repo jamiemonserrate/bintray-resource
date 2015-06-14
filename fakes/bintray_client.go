@@ -7,6 +7,8 @@ type BintrayClient struct {
 	VersionsToReturn        []string
 	VersionRequested        string
 	DestinationDirRequested string
+	FileToBeUploaded        string
+	VersionToBeUploaded     string
 }
 
 func (fakeBintrayClient *BintrayClient) GetPackage(packageName string) bintray.Package {
@@ -18,4 +20,11 @@ func (fakeBintrayClient *BintrayClient) DownloadPackage(packageName, version, de
 	fakeBintrayClient.PackageNameRequested = packageName
 	fakeBintrayClient.VersionRequested = version
 	fakeBintrayClient.DestinationDirRequested = destinationDir
+}
+
+func (fakeBintrayClient *BintrayClient) UploadPackage(packageName, fileToBeUploaded, version string) error {
+	fakeBintrayClient.PackageNameRequested = packageName
+	fakeBintrayClient.FileToBeUploaded = fileToBeUploaded
+	fakeBintrayClient.VersionToBeUploaded = version
+	return nil
 }

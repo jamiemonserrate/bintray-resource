@@ -1,4 +1,4 @@
-package in
+package out
 
 type Source struct {
 	SubjectName string `json:"subject_name"`
@@ -12,11 +12,12 @@ type Version struct {
 	Number string `json:"number"`
 }
 
-type InRequest struct {
-	Source     Source  `json:"source"`
-	RawVersion Version `json:"version"`
+type OutRequest struct {
+	Source      Source `json:"source"`
+	From        string `json:"from"`
+	VersionFile string `json:"version_file"`
 }
 
-type InResponse struct {
+type OutResponse struct {
 	Version Version
 }

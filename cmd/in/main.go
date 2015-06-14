@@ -14,7 +14,9 @@ func main() {
 	inCommand := in.NewInCommand(bintray.NewClient(
 		"https://dl.bintray.com",
 		inRequest.Source.SubjectName,
-		inRequest.Source.RepoName))
+		inRequest.Source.RepoName,
+		inRequest.Source.Username,
+		inRequest.Source.APIKey))
 
 	destinationDir := os.Args[1]
 	inResponse := inCommand.Execute(inRequest, destinationDir)

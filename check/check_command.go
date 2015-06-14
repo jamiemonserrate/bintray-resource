@@ -15,7 +15,7 @@ func NewCheckCommand(bintrayClient bintray.BintrayClient) CheckCommand {
 }
 
 func (checkCommand *CheckCommand) Execute(checkRequest CheckRequest) CheckResponse {
-	bintrayPackage := checkCommand.bintrayClient.GetPackage(checkRequest.Source.PackageName)
+	bintrayPackage, _ := checkCommand.bintrayClient.GetPackage(checkRequest.Source.PackageName)
 
 	response := CheckResponse{}
 	for _, v := range bintrayPackage.VersionsSince(checkRequest.Version()) {

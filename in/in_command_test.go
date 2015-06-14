@@ -1,6 +1,7 @@
 package in_test
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -15,13 +16,13 @@ import (
 
 var _ = Describe("InCommand", func() {
 	var (
-		fakeBintrayClient fakes.BintrayClient
+		fakeBintrayClient *fakes.BintrayClient
 		destRootDir       string
 		err               error
 	)
 
 	BeforeEach(func() {
-		fakeBintrayClient = fakes.BintrayClient{}
+		fakeBintrayClient = &fakes.BintrayClient{}
 		destRootDir, err = ioutil.TempDir("", "bintray-resource-integration-test")
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -36,7 +37,7 @@ var _ = Describe("InCommand", func() {
 		inRequest := in.InRequest{Source: bintrayresource.Source{PackageName: "awesome-package"},
 			RawVersion: bintrayresource.Version{Number: "1.0.0"}}
 
-		inCommand := in.NewInCommand(&fakeBintrayClient)
+		inCommand := in.NewInCommand(fakeBintrayClient)
 		inCommand.Execute(inRequest, destDir)
 
 		Expect(fakeBintrayClient.PackageNameRequested).To(Equal("awesome-package"))
@@ -48,17 +49,40 @@ var _ = Describe("InCommand", func() {
 		destDir := filepath.Join(destRootDir, "i-want-to-be-here")
 		Expect(destDir).ToNot(BeAnExistingFile())
 
-		inCommand := in.NewInCommand(&fakeBintrayClient)
+		inCommand := in.NewInCommand(fakeBintrayClient)
 		inCommand.Execute(in.InRequest{}, destDir)
 
 		Expect(destDir).To(BeAnExistingFile())
 	})
 
 	It("Returns the version of the file in the response", func() {
+		destDir := filepath.Join(destRootDir, "i-want-to-be-here")
 		inRequest := in.InRequest{RawVersion: bintrayresource.Version{Number: "0.0.1"}}
 
-		inCommand := in.NewInCommand(&fakeBintrayClient)
+		inCommand := in.NewInCommand(fakeBintrayClient)
 
-		Expect(inCommand.Execute(inRequest, "")).To(Equal(in.InResponse{bintrayresource.Version{Number: "0.0.1"}}))
+		Expect(inCommand.Execute(inRequest, destDir)).To(Equal(&in.InResponse{bintrayresource.Version{Number: "0.0.1"}}))
+	})
+
+	It("Returns error from the client", func() {
+		destDir := filepath.Join(destRootDir, "i-want-to-be-here")
+		inRequest := in.InRequest{RawVersion: bintrayresource.Version{Number: "0.0.1"}}
+		fakeBintrayClient.ErrorToBeReturned = errors.New("Some error")
+
+		inCommand := in.NewInCommand(fakeBintrayClient)
+		_, err := inCommand.Execute(inRequest, destDir)
+
+		Expect(err).To(MatchError("Some error"))
+	})
+
+	It("Returns error if cannot create directory", func() {
+		destDir := filepath.Join(destRootDir, "i-want-to-be-here")
+		os.MkdirAll(destDir, 0400)
+		inRequest := in.InRequest{RawVersion: bintrayresource.Version{Number: "0.0.1"}}
+
+		inCommand := in.NewInCommand(fakeBintrayClient)
+		_, err := inCommand.Execute(inRequest, filepath.Join(destDir, "some-path"))
+
+		Expect(err).To(MatchError(ContainSubstring("permission denied")))
 	})
 })

@@ -18,7 +18,7 @@ func main() {
 		checkRequest.Source.Username,
 		checkRequest.Source.APIKey))
 
-	checkResponse := checkCommand.Execute(checkRequest)
+	checkResponse, _ := checkCommand.Execute(checkRequest)
 
 	writeToStdout(checkResponse)
 }

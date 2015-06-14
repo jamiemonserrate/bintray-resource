@@ -19,7 +19,7 @@ func main() {
 		inRequest.Source.APIKey))
 
 	destinationDir := os.Args[1]
-	inResponse := inCommand.Execute(inRequest, destinationDir)
+	inResponse, _ := inCommand.Execute(inRequest, destinationDir)
 
 	writeToStdout(inResponse)
 }
@@ -30,6 +30,6 @@ func decodeJSONFrom(request *os.File) in.InRequest {
 	return inRequest
 }
 
-func writeToStdout(response in.InResponse) {
+func writeToStdout(response *in.InResponse) {
 	json.NewEncoder(os.Stdout).Encode(response)
 }

@@ -16,12 +16,18 @@ func NewOutCommand(bintrayClient bintray.BintrayClient) OutCommand {
 	return OutCommand{bintrayClient: bintrayClient}
 }
 
-func (outCommand *OutCommand) Execute(outRequest OutRequest) OutResponse {
-	version, _ := ioutil.ReadFile(outRequest.VersionFile)
-	outCommand.bintrayClient.UploadPackage(outRequest.Source.PackageName,
+func (outCommand *OutCommand) Execute(outRequest OutRequest) (*OutResponse, error) {
+	version, err := ioutil.ReadFile(outRequest.VersionFile)
+	if err != nil {
+		return nil, err
+	}
+	err = outCommand.bintrayClient.UploadPackage(outRequest.Source.PackageName,
 		outRequest.From, string(version))
+	if err != nil {
+		return nil, err
+	}
 
-	return OutResponse{Version: bintrayresource.Version{Number: string(version)}}
+	return &OutResponse{Version: bintrayresource.Version{Number: string(version)}}, nil
 }
 
 func toVersion(versionString string) *version.Version {

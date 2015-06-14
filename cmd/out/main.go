@@ -18,7 +18,7 @@ func main() {
 		outRequest.Source.Username,
 		outRequest.Source.APIKey))
 
-	outResponse := outCommand.Execute(outRequest)
+	outResponse, _ := outCommand.Execute(outRequest)
 
 	writeToStdout(outResponse)
 }
@@ -29,6 +29,6 @@ func decodeJSONFrom(request *os.File) out.OutRequest {
 	return outRequest
 }
 
-func writeToStdout(response out.OutResponse) {
+func writeToStdout(response *out.OutResponse) {
 	json.NewEncoder(os.Stdout).Encode(response)
 }

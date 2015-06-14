@@ -1,6 +1,7 @@
 package bintray_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -175,6 +176,7 @@ var _ = Describe("Client", func() {
 			fileToUploadPath := path.Join(tmpDir, "some-package")
 			err := ioutil.WriteFile(fileToUploadPath, []byte("super duper package contents"), 0755)
 			Expect(err).ToNot(HaveOccurred())
+
 			server.AppendHandlers(ghttp.CombineHandlers(
 				ghttp.VerifyRequest("PUT", "/content/subject_name/repo_name/package_name/version/version/package_name"),
 				VerifyContentsUploaded("super duper package contents"),
@@ -186,6 +188,52 @@ var _ = Describe("Client", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		Context("handles errors", func() {
+			It("if input file cannot be read", func() {
+				err = client.UploadPackage("doesntmatter", "invalid-file", "doesntmatter")
+
+				Expect(err).To(MatchError(ContainSubstring("no such file or directory")))
+			})
+
+			It("if bintray returns error", func() {
+				client = bintray.NewClient("some-invalid-url", "doesntmatter", "doesntmatter", "doesntmatter", "doesntmatter")
+
+				err = client.UploadPackage("doesntmatter", tmpDir, "doesntmatter")
+
+				Expect(err).To(MatchError(ContainSubstring("unsupported protocol scheme")))
+			})
+		})
+
+		It("if bintray returns a non 201 status code with a valid error message", func() {
+			fileToUploadPath := path.Join(tmpDir, "some-package")
+			err := ioutil.WriteFile(fileToUploadPath, []byte("super duper package contents"), 0755)
+			Expect(err).ToNot(HaveOccurred())
+
+			server.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.RespondWithJSONEncoded(http.StatusNotFound, bintray.ErrorResponse{Message: "The requested path was not found"}),
+			))
+
+			err = client.UploadPackage("doesntmatter", fileToUploadPath, "doesntmatter")
+			fmt.Println(err.Error())
+
+			Expect(err).To(MatchError("The requested path was not found"))
+		})
+
+		It("if bintray returns a non 201 status code with a invalid JSON", func() {
+			fileToUploadPath := path.Join(tmpDir, "some-package")
+			err := ioutil.WriteFile(fileToUploadPath, []byte("super duper package contents"), 0755)
+			Expect(err).ToNot(HaveOccurred())
+
+			server.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.RespondWith(http.StatusNotFound, "Server down"),
+			))
+
+			err = client.UploadPackage("doesntmatter", fileToUploadPath, "doesntmatter")
+			fmt.Println(err.Error())
+
+			Expect(err).To(MatchError("Server down"))
 		})
 	})
 

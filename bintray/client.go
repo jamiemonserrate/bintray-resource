@@ -90,16 +90,32 @@ func (client *Client) DeleteVersion(packageName, version string) error {
 }
 
 func (client *Client) UploadPackage(packageName, from, version string) error {
-	file, _ := os.Open(from)
+	file, err := os.Open(from)
+	if err != nil {
+		return err
+	}
 	defer file.Close()
-	fileStat, _ := file.Stat()
+	fileStat, err := file.Stat()
+	if err != nil {
+		return err
+	}
 
-	req, _ := http.NewRequest("PUT", client.outPackageURL(packageName, version), file)
-	req.ContentLength = int64(fileStat.Size())
-	req.SetBasicAuth(client.username, client.password)
-	c := &http.Client{}
-	_, err := c.Do(req)
-	return err
+	request, err := http.NewRequest("PUT", client.outPackageURL(packageName, version), file)
+	if err != nil {
+		return err
+	}
+	request.ContentLength = int64(fileStat.Size())
+	request.SetBasicAuth(client.username, client.password)
+	httpClient := &http.Client{}
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusCreated {
+		return client.parseErrorFrom(response)
+	}
+	return nil
 }
 
 func (client *Client) getPackageURL(packageName string) string {

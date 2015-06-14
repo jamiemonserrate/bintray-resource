@@ -55,7 +55,7 @@ var _ = Describe("Client", func() {
 			Expect(bintrayPackage).To(Equal(expectedPackage))
 		})
 
-		Context("returns the error", func() {
+		Context("handles errors", func() {
 			It("if bintray returns error", func() {
 				client = bintray.NewClient("some-invalid-url", "doesntmatter", "doesntmatter", "doesntmatter", "doesntmatter")
 
@@ -73,33 +73,42 @@ var _ = Describe("Client", func() {
 				bintrayPackage, err := client.GetPackage("package_name")
 
 				Expect(bintrayPackage).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("The requested path was not found"))
+				Expect(err).To(MatchError("The requested path was not found"))
+			})
+
+			It("if bintray returns a 200 status code with a valid error message", func() {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.RespondWithJSONEncoded(http.StatusOK, bintray.ErrorResponse{Message: "Please try again later"}),
+				))
+
+				bintrayPackage, err := client.GetPackage("package_name")
+
+				Expect(bintrayPackage).To(BeNil())
+				Expect(err).To(MatchError("Please try again later"))
 			})
 
 			Context("when Response cannot be parsed", func() {
 				It("returns error for 200 status code", func() {
 					server.AppendHandlers(ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusOK, "something we dont expect"),
+						ghttp.RespondWith(http.StatusOK, "something we dont expect"),
 					))
 
 					bintrayPackage, err := client.GetPackage("package_name")
 
 					Expect(bintrayPackage).To(BeNil())
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(Equal("json: cannot unmarshal string into Go value of type bintray.Package"))
+					Expect(err).To(MatchError("something we dont expect"))
 				})
 
 				It("returns error for non 200 status code", func() {
 					server.AppendHandlers(ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusInternalServerError, "something we dont expect"),
+						ghttp.RespondWith(http.StatusInternalServerError, "something we dont expect"),
 					))
 
 					bintrayPackage, err := client.GetPackage("package_name")
 
 					Expect(bintrayPackage).To(BeNil())
 					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(Equal("json: cannot unmarshal string into Go value of type bintray.ErrorResponse"))
+					Expect(err).To(MatchError("something we dont expect"))
 				})
 			})
 		})
@@ -112,7 +121,8 @@ var _ = Describe("Client", func() {
 				ghttp.RespondWith(http.StatusOK, "the downloaded file content"),
 			))
 
-			client.DownloadPackage("package_name", "version", tmpDir)
+			err := client.DownloadPackage("package_name", "version", tmpDir)
+			Expect(err).ToNot(HaveOccurred())
 
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 
@@ -122,6 +132,41 @@ var _ = Describe("Client", func() {
 			contents, err := ioutil.ReadFile(downloadedPackage)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(string(contents)).To(Equal("the downloaded file content"))
+		})
+
+		Context("handles errors", func() {
+			It("returns error if cannot create file", func() {
+				err := client.DownloadPackage("doesntmatter", "doesntmatter", "some-invalid-directory")
+				Expect(err).To(MatchError(ContainSubstring("no such file or directory")))
+			})
+
+			It("if bintray returns error", func() {
+				client = bintray.NewClient("some-invalid-url", "doesntmatter", "doesntmatter", "doesntmatter", "doesntmatter")
+
+				err := client.DownloadPackage("doesntmatter", "doesntmatter", tmpDir)
+
+				Expect(err).To(MatchError(ContainSubstring("unsupported protocol scheme")))
+			})
+
+			It("if bintray returns a non 200 status code with a valid error message", func() {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.RespondWithJSONEncoded(http.StatusNotFound, bintray.ErrorResponse{Message: "The requested path was not found"}),
+				))
+
+				err := client.DownloadPackage("doesntmatter", "doesntmatter", tmpDir)
+
+				Expect(err).To(MatchError("The requested path was not found"))
+			})
+
+			It("if bintray returns a non 200 status code with invalid JSON", func() {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.RespondWith(http.StatusNotFound, "The requested path was not found"),
+				))
+
+				err := client.DownloadPackage("doesntmatter", "doesntmatter", tmpDir)
+
+				Expect(err).To(MatchError("The requested path was not found"))
+			})
 		})
 	})
 

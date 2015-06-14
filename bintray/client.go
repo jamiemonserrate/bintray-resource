@@ -1,10 +1,12 @@
 package bintray
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -45,26 +47,49 @@ func (client *Client) GetPackage(packageName string) (*Package, error) {
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
 		errorResponse := ErrorResponse{}
-		if err := json.NewDecoder(response.Body).Decode(&errorResponse); err != nil {
-			return nil, err
+		errorString, _ := ioutil.ReadAll(response.Body)
+		if err = json.NewDecoder(bytes.NewReader(errorString)).Decode(&errorResponse); err != nil {
+			return nil, errors.New(string(errorString))
 		}
 		return nil, errors.New(errorResponse.Message)
 	}
 
 	var bintrayPackage *Package
-	if err := json.NewDecoder(response.Body).Decode(&bintrayPackage); err != nil {
-		return nil, err
+	responseBytes, _ := ioutil.ReadAll(response.Body)
+	if err := json.NewDecoder(bytes.NewReader(responseBytes)).Decode(&bintrayPackage); err != nil || bintrayPackage.RawLatestVersion == "" {
+		errorResponse := ErrorResponse{}
+		if err = json.NewDecoder(bytes.NewReader(responseBytes)).Decode(&errorResponse); err != nil {
+			return nil, errors.New(string(responseBytes))
+		}
+		return nil, errors.New(errorResponse.Message)
 	}
 
 	return bintrayPackage, nil
 }
 
-func (client *Client) DownloadPackage(packageName, version, destinationDir string) {
-	downloadedFile, _ := os.Create(filepath.Join(destinationDir, packageName))
+func (client *Client) DownloadPackage(packageName, version, destinationDir string) error {
+	downloadedFile, err := os.Create(filepath.Join(destinationDir, packageName))
+	if err != nil {
+		return err
+	}
+
 	defer downloadedFile.Close()
-	response, _ := http.Get(client.inPackageURL(packageName, version))
+	response, err := http.Get(client.inPackageURL(packageName, version))
+	if err != nil {
+		return err
+	}
+	if response.StatusCode != http.StatusOK {
+		errorResponse := ErrorResponse{}
+		errorString, _ := ioutil.ReadAll(response.Body)
+		if err = json.NewDecoder(bytes.NewReader(errorString)).Decode(&errorResponse); err != nil {
+			return errors.New(string(errorString))
+		}
+
+		return errors.New(errorResponse.Message)
+	}
 	defer response.Body.Close()
-	io.Copy(downloadedFile, response.Body)
+	_, err = io.Copy(downloadedFile, response.Body)
+	return err
 }
 
 func (client *Client) DeleteVersion(packageName, version string) error {

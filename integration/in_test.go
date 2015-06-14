@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/in"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -39,11 +40,11 @@ var _ = Describe("in", func() {
 
 	It("Downloads file for the version", func() {
 		response := execInCommandWith(in.InRequest{
-			RawVersion: in.Version{Number: "2.2.3"},
-			Source:     in.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
+			RawVersion: bintrayresource.Version{Number: "2.2.3"},
+			Source:     bintrayresource.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
 		})
 
-		Expect(response).To(Equal(in.InResponse{Version: in.Version{Number: "2.2.3"}}))
+		Expect(response).To(Equal(in.InResponse{Version: bintrayresource.Version{Number: "2.2.3"}}))
 
 		Expect(filepath.Join(destDir, "cf-artifactory")).To(BeARegularFile())
 		contents, err := ioutil.ReadFile(filepath.Join(destDir, "cf-artifactory"))

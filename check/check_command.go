@@ -2,6 +2,7 @@ package check
 
 import (
 	"github.com/hashicorp/go-version"
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
 )
 
@@ -18,7 +19,7 @@ func (checkCommand *CheckCommand) Execute(checkRequest CheckRequest) CheckRespon
 
 	response := CheckResponse{}
 	for _, v := range bintrayPackage.VersionsSince(checkRequest.Version()) {
-		response = append(response, Version{Number: v.String()})
+		response = append(response, bintrayresource.Version{Number: v.String()})
 	}
 	return response
 }

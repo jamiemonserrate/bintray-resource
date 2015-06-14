@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
 	"github.com/jamiemonserrate/bintray-resource/out"
 	. "github.com/onsi/ginkgo"
@@ -61,7 +62,7 @@ var _ = Describe("out", func() {
 			VersionFile: versionFilePath,
 			Source:      source()})
 
-		Expect(response).To(Equal(out.OutResponse{Version: out.Version{Number: expectedVersion}}))
+		Expect(response).To(Equal(out.OutResponse{Version: bintrayresource.Version{Number: expectedVersion}}))
 		Expect(downloadAndReadContentsOf(packageName, expectedVersion)).To(Equal("some-content"))
 	})
 })
@@ -100,8 +101,8 @@ func newAPIClient() *bintray.Client {
 		bintrayAPIKey)
 }
 
-func source() out.Source {
-	return out.Source{SubjectName: bintraySubjectName,
+func source() bintrayresource.Source {
+	return bintrayresource.Source{SubjectName: bintraySubjectName,
 		RepoName:    bintrayRepoName,
 		PackageName: packageName,
 		Username:    bintrayUsername,

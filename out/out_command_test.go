@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/fakes"
 	"github.com/jamiemonserrate/bintray-resource/out"
 
@@ -33,7 +34,7 @@ var _ = Describe("OutCommand", func() {
 	It("Uploads the file with the correct version", func() {
 		versionFilePath := filepath.Join(tmpDir, "version_file")
 		ioutil.WriteFile(versionFilePath, []byte("6.6.6"), 0755)
-		outRequest := out.OutRequest{Source: out.Source{PackageName: "awesome-package"},
+		outRequest := out.OutRequest{Source: bintrayresource.Source{PackageName: "awesome-package"},
 			VersionFile: versionFilePath,
 			From:        "path/to/file/to/be/uploaded"}
 

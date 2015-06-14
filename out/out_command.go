@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/hashicorp/go-version"
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
 )
 
@@ -20,7 +21,7 @@ func (outCommand *OutCommand) Execute(outRequest OutRequest) OutResponse {
 	outCommand.bintrayClient.UploadPackage(outRequest.Source.PackageName,
 		outRequest.From, string(version))
 
-	return OutResponse{Version: Version{Number: string(version)}}
+	return OutResponse{Version: bintrayresource.Version{Number: string(version)}}
 }
 
 func toVersion(versionString string) *version.Version {

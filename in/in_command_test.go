@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/fakes"
 	"github.com/jamiemonserrate/bintray-resource/in"
 
@@ -32,8 +33,8 @@ var _ = Describe("InCommand", func() {
 
 	It("Downloads the correct package", func() {
 		destDir := filepath.Join(destRootDir, "on-the-moon")
-		inRequest := in.InRequest{Source: in.Source{PackageName: "awesome-package"},
-			RawVersion: in.Version{Number: "1.0.0"}}
+		inRequest := in.InRequest{Source: bintrayresource.Source{PackageName: "awesome-package"},
+			RawVersion: bintrayresource.Version{Number: "1.0.0"}}
 
 		inCommand := in.NewInCommand(&fakeBintrayClient)
 		inCommand.Execute(inRequest, destDir)
@@ -54,10 +55,10 @@ var _ = Describe("InCommand", func() {
 	})
 
 	It("Returns the version of the file in the response", func() {
-		inRequest := in.InRequest{RawVersion: in.Version{Number: "0.0.1"}}
+		inRequest := in.InRequest{RawVersion: bintrayresource.Version{Number: "0.0.1"}}
 
 		inCommand := in.NewInCommand(&fakeBintrayClient)
 
-		Expect(inCommand.Execute(inRequest, "")).To(Equal(in.InResponse{in.Version{Number: "0.0.1"}}))
+		Expect(inCommand.Execute(inRequest, "")).To(Equal(in.InResponse{bintrayresource.Version{Number: "0.0.1"}}))
 	})
 })

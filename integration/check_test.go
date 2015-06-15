@@ -8,6 +8,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 
 	"github.com/jamiemonserrate/bintray-resource"
@@ -50,6 +51,23 @@ var _ = Describe("check", func() {
 		})
 
 		Expect(response).To(Equal(check.CheckResponse{{Number: "2.2.3"}}))
+	})
+
+	Context("when an error occurs", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			checkRequest := check.CheckRequest{
+				Source: bintrayresource.Source{SubjectName: "nonsense"},
+			}
+			command := exec.Command(checkPath)
+			command.Stdin = encodeJson(checkRequest)
+
+			buffer := gbytes.NewBuffer()
+
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
+			Eventually(buffer).Should(gbytes.Say(`error runningCommand:`))
+		})
 	})
 })
 

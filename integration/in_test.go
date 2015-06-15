@@ -13,6 +13,7 @@ import (
 	"github.com/jamiemonserrate/bintray-resource/in"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 )
 
@@ -50,6 +51,23 @@ var _ = Describe("in", func() {
 		contents, err := ioutil.ReadFile(filepath.Join(destDir, "cf-artifactory"))
 		Expect(err).ToNot(HaveOccurred())
 		Expect(contents).To(Equal([]byte("These contents are valid\n")))
+	})
+
+	Context("when an error occurs", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			inRequest := in.InRequest{
+				Source: bintrayresource.Source{SubjectName: "nonsense"},
+			}
+			command := exec.Command(inPath, destDir)
+			command.Stdin = encodeInRequest(inRequest)
+
+			buffer := gbytes.NewBuffer()
+
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
+			Eventually(buffer).Should(gbytes.Say(`error runningCommand:`))
+		})
 	})
 })
 

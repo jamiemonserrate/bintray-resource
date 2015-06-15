@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
 	"github.com/jamiemonserrate/bintray-resource/in"
 )
@@ -19,7 +20,10 @@ func main() {
 		inRequest.Source.APIKey))
 
 	destinationDir := os.Args[1]
-	inResponse, _ := inCommand.Execute(inRequest, destinationDir)
+	inResponse, err := inCommand.Execute(inRequest, destinationDir)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 
 	writeToStdout(inResponse)
 }

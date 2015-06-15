@@ -14,6 +14,7 @@ import (
 	"github.com/jamiemonserrate/bintray-resource/out"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 )
 
@@ -49,22 +50,43 @@ var _ = Describe("out", func() {
 	AfterEach(func() {
 		err := os.RemoveAll(inputDir)
 		Expect(err).ToNot(HaveOccurred())
-
-		err = bintrayClient.DeleteVersion(packageName, expectedVersion)
-		Expect(err).ToNot(HaveOccurred())
 	})
 
-	It("uploads the file and returns version in the response", func() {
-		ioutil.WriteFile(fileToUploadPath, []byte("some-content"), 0755)
-		ioutil.WriteFile(versionFilePath, []byte(expectedVersion), 0755)
+	Context("when no error occurs", func() {
+		AfterEach(func() {
+			err = bintrayClient.DeleteVersion(packageName, expectedVersion)
+			Expect(err).ToNot(HaveOccurred())
+		})
 
-		response := executeCommandWith(out.OutRequest{
-			From:        fileToUploadPath,
-			VersionFile: versionFilePath,
-			Source:      source()})
+		It("uploads the file and returns version in the response", func() {
+			ioutil.WriteFile(fileToUploadPath, []byte("some-content"), 0755)
+			ioutil.WriteFile(versionFilePath, []byte(expectedVersion), 0755)
 
-		Expect(response).To(Equal(out.OutResponse{Version: bintrayresource.Version{Number: expectedVersion}}))
-		Expect(downloadAndReadContentsOf(packageName, expectedVersion)).To(Equal("some-content"))
+			response := executeCommandWith(out.OutRequest{
+				From:        fileToUploadPath,
+				VersionFile: versionFilePath,
+				Source:      source()})
+
+			Expect(response).To(Equal(out.OutResponse{Version: bintrayresource.Version{Number: expectedVersion}}))
+			Expect(downloadAndReadContentsOf(packageName, expectedVersion)).To(Equal("some-content"))
+		})
+	})
+
+	Context("when an error occurs", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			outRequest := out.OutRequest{
+				Source: bintrayresource.Source{SubjectName: "nonsense"},
+			}
+			command := exec.Command(outPath)
+			command.Stdin = encodeOutRequest(outRequest)
+
+			buffer := gbytes.NewBuffer()
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 50*time.Second).Should(gexec.Exit(1))
+
+			Eventually(buffer).Should(gbytes.Say(`error runningCommand:`))
+		})
 	})
 })
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
 	"github.com/jamiemonserrate/bintray-resource/check"
 )
@@ -18,7 +19,10 @@ func main() {
 		checkRequest.Source.Username,
 		checkRequest.Source.APIKey))
 
-	checkResponse, _ := checkCommand.Execute(checkRequest)
+	checkResponse, err := checkCommand.Execute(checkRequest)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 
 	writeToStdout(checkResponse)
 }

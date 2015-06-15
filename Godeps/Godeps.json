@@ -1,0 +1,27 @@
+{
+	"ImportPath": "github.com/jamiemonserrate/bintray-resource",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/hashicorp/go-version",
+			"Rev": "999359b6b7a041ce16e695d51e92145b83f01087"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/colorstring",
+			"Rev": "61164e49940b423ba1f12ddbdf01632ac793e5e9"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.2.0",
+			"Rev": "462326b1628e124b23f42e87a8f2750e3c4e2d24"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-50-gd6c945f",
+			"Rev": "d6c945f9fdbf6cad99e85b0feff591caa268e0db"
+		}
+	]
+}

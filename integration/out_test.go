@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -18,44 +17,25 @@ import (
 	"github.com/onsi/gomega/gexec"
 )
 
-var (
-	err                error
-	outPath            string
-	inputDir           string
-	versionFilePath    string
-	fileToUploadPath   string
-	bintrayUsername    = "jamiemonserrate"
-	bintrayAPIKey      = "9dd0d7a78b11e773ef4dbc389cf36c1cfe536ebc"
-	bintraySubjectName = "jamiemonserrate"
-	bintrayRepoName    = "jamie-concourse"
-	packageName        = "cf-artifactory"
-	expectedVersion    = "2.2.5"
-)
-
 var _ = Describe("out", func() {
-	var bintrayClient *bintray.Client
+	var (
+		versionFilePath  string
+		fileToUploadPath string
+		expectedVersion  = "2.2.5"
+		bintrayClient    *bintray.Client
+	)
 
 	BeforeEach(func() {
-		outPath, err = gexec.Build("github.com/jamiemonserrate/bintray-resource/cmd/out")
-		Expect(err).NotTo(HaveOccurred())
-
-		inputDir, err = ioutil.TempDir("", "bintray-resource-outtegration-test")
-		versionFilePath = filepath.Join(inputDir, "number")
-		fileToUploadPath = filepath.Join(inputDir, "fileToUpload.txt")
+		versionFilePath = filepath.Join(tmpDir, "number")
+		fileToUploadPath = filepath.Join(tmpDir, "fileToUpload.txt")
 		bintrayClient = newAPIClient()
 
 		bintrayClient.DeleteVersion(packageName, expectedVersion)
 	})
 
-	AfterEach(func() {
-		err := os.RemoveAll(inputDir)
-		Expect(err).ToNot(HaveOccurred())
-	})
-
 	Context("when no error occurs", func() {
 		AfterEach(func() {
-			err = bintrayClient.DeleteVersion(packageName, expectedVersion)
-			Expect(err).ToNot(HaveOccurred())
+			deleteVersion(expectedVersion)
 		})
 
 		It("uploads the file and returns version in the response", func() {
@@ -113,15 +93,6 @@ func decodeOutResponse(encodedResponse []byte) out.OutResponse {
 	err := json.NewDecoder(bytes.NewBuffer(encodedResponse)).Decode(&decodedResponse)
 	Expect(err).ToNot(HaveOccurred())
 	return decodedResponse
-}
-
-func newAPIClient() *bintray.Client {
-	return bintray.NewClient(
-		bintray.APIURL,
-		bintraySubjectName,
-		bintrayRepoName,
-		bintrayUsername,
-		bintrayAPIKey)
 }
 
 func source() bintrayresource.Source {

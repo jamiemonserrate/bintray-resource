@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -17,40 +16,29 @@ import (
 	"github.com/onsi/gomega/gexec"
 )
 
-var (
-	destDir string
-	inPath  string
-)
-
 var _ = Describe("in", func() {
-	var (
-		err error
-	)
+	var expectedVersion = "2.2.4"
 
 	BeforeEach(func() {
-		inPath, err = gexec.Build("github.com/jamiemonserrate/bintray-resource/cmd/in")
-		Expect(err).NotTo(HaveOccurred())
-		destDir, err = ioutil.TempDir("", "bintray-resource-integration-test")
-		Expect(err).NotTo(HaveOccurred())
+		createVersion(expectedVersion)
 	})
 
 	AfterEach(func() {
-		err := os.RemoveAll(destDir)
-		Expect(err).ToNot(HaveOccurred())
+		deleteVersion(expectedVersion)
 	})
 
 	It("Downloads file for the version", func() {
 		response := execInCommandWith(in.InRequest{
-			RawVersion: bintrayresource.Version{Number: "2.2.3"},
-			Source:     bintrayresource.Source{SubjectName: "jamiemonserrate", RepoName: "jamie-concourse", PackageName: "cf-artifactory"},
+			RawVersion: bintrayresource.Version{Number: expectedVersion},
+			Source:     bintrayresource.Source{SubjectName: bintraySubjectName, RepoName: bintrayRepoName, PackageName: packageName},
 		})
 
-		Expect(response).To(Equal(in.InResponse{Version: bintrayresource.Version{Number: "2.2.3"}}))
+		Expect(response).To(Equal(in.InResponse{Version: bintrayresource.Version{Number: expectedVersion}}))
 
-		Expect(filepath.Join(destDir, "cf-artifactory")).To(BeARegularFile())
-		contents, err := ioutil.ReadFile(filepath.Join(destDir, "cf-artifactory"))
+		Expect(filepath.Join(tmpDir, packageName)).To(BeARegularFile())
+		contents, err := ioutil.ReadFile(filepath.Join(tmpDir, packageName))
 		Expect(err).ToNot(HaveOccurred())
-		Expect(contents).To(Equal([]byte("These contents are valid\n")))
+		Expect(contents).To(Equal([]byte("These contents are valid")))
 	})
 
 	Context("when an error occurs", func() {
@@ -58,7 +46,7 @@ var _ = Describe("in", func() {
 			inRequest := in.InRequest{
 				Source: bintrayresource.Source{SubjectName: "nonsense"},
 			}
-			command := exec.Command(inPath, destDir)
+			command := exec.Command(inPath, tmpDir)
 			command.Stdin = encodeInRequest(inRequest)
 
 			buffer := gbytes.NewBuffer()
@@ -72,7 +60,7 @@ var _ = Describe("in", func() {
 })
 
 func execInCommandWith(inRequest in.InRequest) in.InResponse {
-	command := exec.Command(inPath, destDir)
+	command := exec.Command(inPath, tmpDir)
 	command.Stdin = encodeInRequest(inRequest)
 
 	session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)

@@ -59,7 +59,7 @@ var _ = Describe("check", func() {
 				Source: bintrayresource.Source{SubjectName: "nonsense"},
 			}
 			command := exec.Command(checkPath)
-			command.Stdin = encodeJson(checkRequest)
+			command.Stdin = encodeCheckRequest(checkRequest)
 
 			buffer := gbytes.NewBuffer()
 
@@ -73,23 +73,23 @@ var _ = Describe("check", func() {
 
 func execCheckCommandWith(checkRequest check.CheckRequest) check.CheckResponse {
 	command := exec.Command(checkPath)
-	command.Stdin = encodeJson(checkRequest)
+	command.Stdin = encodeCheckRequest(checkRequest)
 
 	session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).NotTo(HaveOccurred())
 	Eventually(session, 5*time.Second).Should(gexec.Exit(0))
 
-	return decodeJson(session.Buffer().Contents())
+	return decodeCheckResponse(session.Buffer().Contents())
 }
 
-func encodeJson(checkRequest check.CheckRequest) *bytes.Buffer {
+func encodeCheckRequest(checkRequest check.CheckRequest) *bytes.Buffer {
 	encodedJson := &bytes.Buffer{}
 	err := json.NewEncoder(encodedJson).Encode(checkRequest)
 	Expect(err).ToNot(HaveOccurred())
 	return encodedJson
 }
 
-func decodeJson(encodedResponse []byte) check.CheckResponse {
+func decodeCheckResponse(encodedResponse []byte) check.CheckResponse {
 	decodedResponse := check.CheckResponse{}
 	err := json.NewDecoder(bytes.NewBuffer(encodedResponse)).Decode(&decodedResponse)
 	Expect(err).ToNot(HaveOccurred())

@@ -39,3 +39,5 @@ The path must identify a single file.
 #### Parameters
 
 * `from`: *Required.* A path specifying the file to upload.
+
+* `version_file`: *Required.* A path to a file specifying the version of the file being uploaded.

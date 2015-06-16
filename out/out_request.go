@@ -1,6 +1,6 @@
 package out
 
-import "github.com/jamiemonserrate/bintray-resource"
+import "github.com/jamiemonserrate/bintray-resource/bintrayresource"
 
 type OutRequest struct {
 	Source      bintrayresource.Source `json:"source"`

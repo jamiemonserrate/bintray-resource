@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 	"github.com/jamiemonserrate/bintray-resource/out"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -11,3 +11,10 @@ type Source struct {
 type Version struct {
 	Number string `json:"number"`
 }
+
+func (s *Source) IsValid() bool {
+	if s.SubjectName == "" || s.RepoName == "" || s.PackageName == "" || s.Username == "" || s.APIKey == "" {
+		return false
+	}
+	return true
+}

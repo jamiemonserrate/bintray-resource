@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jamiemonserrate/bintray-resource"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 	"github.com/jamiemonserrate/bintray-resource/fakes"
 	"github.com/jamiemonserrate/bintray-resource/in"
 

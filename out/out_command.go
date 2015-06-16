@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 
 	"github.com/hashicorp/go-version"
-	"github.com/jamiemonserrate/bintray-resource"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 )
 
 type OutCommand struct {

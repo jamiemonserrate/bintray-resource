@@ -2,7 +2,7 @@ package check
 
 import (
 	"github.com/hashicorp/go-version"
-	"github.com/jamiemonserrate/bintray-resource"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 )
 
 type CheckRequest struct {

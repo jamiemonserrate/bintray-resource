@@ -3,7 +3,7 @@ package check_test
 import (
 	"errors"
 
-	"github.com/jamiemonserrate/bintray-resource"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 	"github.com/jamiemonserrate/bintray-resource/check"
 	"github.com/jamiemonserrate/bintray-resource/fakes"
 	. "github.com/onsi/ginkgo"

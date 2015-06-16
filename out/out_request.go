@@ -11,3 +11,7 @@ type OutRequest struct {
 type OutResponse struct {
 	Version bintrayresource.Version
 }
+
+func (outRequest *OutRequest) IsValid() bool {
+	return outRequest.Source.IsValid() && outRequest.From != "" && outRequest.VersionFile != ""
+}

@@ -19,4 +19,24 @@ var _ = Describe("CheckRequest", func() {
 		})
 	})
 
+	Context(".IsValid", func() {
+		It("returns true if it has all required params", func() {
+			checkRequest := validCheckRequest()
+
+			Expect(checkRequest.IsValid()).To(BeTrue())
+		})
+
+		It("returns false if required params missing", func() {
+			checkRequest := validCheckRequest()
+			checkRequest.Source.RepoName = ""
+
+			Expect(checkRequest.IsValid()).To(BeFalse())
+		})
+	})
 })
+
+func validCheckRequest() check.CheckRequest {
+	return check.CheckRequest{Source: bintrayresource.Source{SubjectName: "something",
+		RepoName: "something", PackageName: "something",
+		Username: "something", APIKey: "something"}}
+}

@@ -10,3 +10,7 @@ type InRequest struct {
 type InResponse struct {
 	Version bintrayresource.Version
 }
+
+func (inRequest *InRequest) IsValid() bool {
+	return inRequest.Source.IsValid() && inRequest.RawVersion.Number != ""
+}

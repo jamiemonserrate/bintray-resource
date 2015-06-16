@@ -16,3 +16,7 @@ func (checkRequest *CheckRequest) Version() *version.Version {
 }
 
 type CheckResponse []bintrayresource.Version
+
+func (checkRequest *CheckRequest) IsValid() bool {
+	return checkRequest.Source.IsValid()
+}

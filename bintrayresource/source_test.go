@@ -22,33 +22,49 @@ var _ = Describe("Source", func() {
 			source = validBintraySource()
 		})
 
-		It("returns false if SubjectName is missing", func() {
+		It("returns false if SubjectName is missing and an error message", func() {
 			source.SubjectName = ""
 
-			Expect(source.IsValid()).To(BeFalse())
+			isValid, errMssg := source.IsValid()
+
+			Expect(isValid).To(BeFalse())
+			Expect(errMssg).To(Equal("Please specify the SubjectName"))
 		})
 
-		It("returns false if RepoName is missing", func() {
+		It("returns false if RepoName is missing and an error message", func() {
 			source.RepoName = ""
 
-			Expect(source.IsValid()).To(BeFalse())
+			isValid, errMssg := source.IsValid()
+
+			Expect(isValid).To(BeFalse())
+			Expect(errMssg).To(Equal("Please specify the RepoName"))
 		})
 
-		It("returns false if PackageName is missing", func() {
+		It("returns false if PackageName is missing and an error message", func() {
 			source.PackageName = ""
 
-			Expect(source.IsValid()).To(BeFalse())
+			isValid, errMssg := source.IsValid()
+
+			Expect(isValid).To(BeFalse())
+			Expect(errMssg).To(Equal("Please specify the PackageName"))
 		})
 
-		It("returns false if Username is missing", func() {
+		It("returns false if Username is missing and an error message", func() {
 			source.Username = ""
 
-			Expect(source.IsValid()).To(BeFalse())
+			isValid, errMssg := source.IsValid()
+
+			Expect(isValid).To(BeFalse())
+			Expect(errMssg).To(Equal("Please specify the Username"))
 		})
-		It("returns false if APIKey  is missing", func() {
+
+		It("returns false if APIKey  is missing and an error message", func() {
 			source.APIKey = ""
 
-			Expect(source.IsValid()).To(BeFalse())
+			isValid, errMssg := source.IsValid()
+
+			Expect(isValid).To(BeFalse())
+			Expect(errMssg).To(Equal("Please specify the APIKey"))
 		})
 	})
 })

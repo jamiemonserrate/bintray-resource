@@ -23,22 +23,31 @@ var _ = Describe("OutRequest", func() {
 				outRequest = validOutRequest()
 			})
 
-			It("returns false if required params missing from Source", func() {
+			It("returns false and an error message if required params missing from Source", func() {
 				outRequest.Source.RepoName = ""
 
-				Expect(outRequest.IsValid()).To(BeFalse())
+				isValid, errMssg := outRequest.IsValid()
+
+				Expect(isValid).To(BeFalse())
+				Expect(errMssg).To(Equal("Please specify the RepoName"))
 			})
 
-			It("returns false if From is not specified", func() {
+			It("returns false and an error message if From is not specified", func() {
 				outRequest.From = ""
 
-				Expect(outRequest.IsValid()).To(BeFalse())
+				isValid, errMssg := outRequest.IsValid()
+
+				Expect(isValid).To(BeFalse())
+				Expect(errMssg).To(Equal("Please specify the From"))
 			})
 
 			It("returns false if Version is not specified", func() {
 				outRequest.VersionFile = ""
 
-				Expect(outRequest.IsValid()).To(BeFalse())
+				isValid, errMssg := outRequest.IsValid()
+
+				Expect(isValid).To(BeFalse())
+				Expect(errMssg).To(Equal("Please specify the VersionFile"))
 			})
 		})
 	})

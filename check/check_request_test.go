@@ -26,11 +26,13 @@ var _ = Describe("CheckRequest", func() {
 			Expect(checkRequest.IsValid()).To(BeTrue())
 		})
 
-		It("returns false if required params missing", func() {
+		It("returns false and an error message if required params missing", func() {
 			checkRequest := validCheckRequest()
 			checkRequest.Source.RepoName = ""
+			isValid, errMessage := checkRequest.IsValid()
 
-			Expect(checkRequest.IsValid()).To(BeFalse())
+			Expect(isValid).To(BeFalse())
+			Expect(errMessage).To(Equal("Please specify the RepoName"))
 		})
 	})
 })

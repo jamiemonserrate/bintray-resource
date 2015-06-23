@@ -12,6 +12,16 @@ type OutResponse struct {
 	Version bintrayresource.Version
 }
 
-func (outRequest *OutRequest) IsValid() bool {
-	return outRequest.Source.IsValid() && outRequest.From != "" && outRequest.VersionFile != ""
+func (outRequest *OutRequest) IsValid() (bool, string) {
+	if isValid, errMssg := outRequest.Source.IsValid(); !isValid {
+		return false, errMssg
+	}
+	if outRequest.From == "" {
+		return false, "Please specify the From"
+	}
+	if outRequest.VersionFile == "" {
+		return false, "Please specify the VersionFile"
+	}
+
+	return true, ""
 }

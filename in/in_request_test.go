@@ -22,16 +22,21 @@ var _ = Describe("InRequest", func() {
 				inRequest = validInRequest()
 			})
 
-			It("returns false if required params missing from Source", func() {
+			It("returns false and an erro message if required params missing from Source", func() {
 				inRequest.Source.RepoName = ""
 
-				Expect(inRequest.IsValid()).To(BeFalse())
+				isValid, errMssg := inRequest.IsValid()
+
+				Expect(isValid).To(BeFalse())
+				Expect(errMssg).To(Equal("Please specify the RepoName"))
 			})
 
-			It("returns false if Version to download is missing", func() {
+			It("returns false and an error message if Version to download is missing", func() {
 				inRequest.RawVersion.Number = ""
 
-				Expect(inRequest.IsValid()).To(BeFalse())
+				isValid, errMssg := inRequest.IsValid()
+				Expect(isValid).To(BeFalse())
+				Expect(errMssg).To(Equal("Please specify the Version"))
 			})
 		})
 	})

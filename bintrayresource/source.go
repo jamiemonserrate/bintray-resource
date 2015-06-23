@@ -12,9 +12,21 @@ type Version struct {
 	Number string `json:"number"`
 }
 
-func (s *Source) IsValid() bool {
-	if s.SubjectName == "" || s.RepoName == "" || s.PackageName == "" || s.Username == "" || s.APIKey == "" {
-		return false
+func (s *Source) IsValid() (bool, string) {
+	if s.SubjectName == "" {
+		return false, "Please specify the SubjectName"
 	}
-	return true
+	if s.RepoName == "" {
+		return false, "Please specify the RepoName"
+	}
+	if s.PackageName == "" {
+		return false, "Please specify the PackageName"
+	}
+	if s.Username == "" {
+		return false, "Please specify the Username"
+	}
+	if s.APIKey == "" {
+		return false, "Please specify the APIKey"
+	}
+	return true, ""
 }

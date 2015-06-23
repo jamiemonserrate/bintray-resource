@@ -11,6 +11,13 @@ type InResponse struct {
 	Version bintrayresource.Version
 }
 
-func (inRequest *InRequest) IsValid() bool {
-	return inRequest.Source.IsValid() && inRequest.RawVersion.Number != ""
+func (inRequest *InRequest) IsValid() (bool, string) {
+	if isValid, errMssg := inRequest.Source.IsValid(); !isValid {
+		return false, errMssg
+	}
+	if inRequest.RawVersion.Number == "" {
+		return false, "Please specify the Version"
+	}
+
+	return true, ""
 }

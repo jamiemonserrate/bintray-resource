@@ -31,7 +31,7 @@ var _ = Describe("check", func() {
 	It("returns empty array if the version provided is the latest", func() {
 		response := execCheckCommandWith(check.CheckRequest{
 			RawVersion: bintrayresource.Version{Number: "2.2.3"},
-			Source:     bintrayresource.Source{SubjectName: bintraySubjectName, RepoName: bintrayRepoName, PackageName: packageName},
+			Source:     source(),
 		})
 
 		Expect(response).To(BeEmpty())
@@ -40,7 +40,7 @@ var _ = Describe("check", func() {
 	It("returns all versions greater than provided version", func() {
 		response := execCheckCommandWith(check.CheckRequest{
 			RawVersion: bintrayresource.Version{Number: "2.1.0"},
-			Source:     bintrayresource.Source{SubjectName: bintraySubjectName, RepoName: bintrayRepoName, PackageName: packageName},
+			Source:     source(),
 		})
 
 		Expect(response).To(Equal(check.CheckResponse{{Number: "2.2.3"}, {Number: "2.2.2"}, {Number: "2.2.1"}}))
@@ -48,7 +48,7 @@ var _ = Describe("check", func() {
 
 	It("returns only the latest version if input is empty", func() {
 		response := execCheckCommandWith(check.CheckRequest{
-			Source: bintrayresource.Source{SubjectName: bintraySubjectName, RepoName: bintrayRepoName, PackageName: packageName},
+			Source: source(),
 		})
 
 		Expect(response).To(Equal(check.CheckResponse{{Number: "2.2.3"}}))

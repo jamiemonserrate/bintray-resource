@@ -1,6 +1,7 @@
 package in
 
 import (
+	"errors"
 	"os"
 
 	"github.com/hashicorp/go-version"
@@ -16,6 +17,10 @@ func NewInCommand(bintrayClient bintray.BintrayClient) InCommand {
 }
 
 func (inCommand *InCommand) Execute(inRequest InRequest, destinationDir string) (*InResponse, error) {
+	if isValid, errMssg := inRequest.IsValid(); !isValid {
+		return nil, errors.New(errMssg)
+	}
+
 	err := os.MkdirAll(destinationDir, 0755)
 	if err != nil {
 		return nil, err

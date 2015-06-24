@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/jamiemonserrate/bintray-resource/bintray"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -74,4 +75,12 @@ func deleteVersion(version string) {
 	client := newAPIClient()
 	err = client.DeleteVersion(packageName, version)
 	Expect(err).ToNot(HaveOccurred())
+}
+
+func source() bintrayresource.Source {
+	return bintrayresource.Source{SubjectName: bintraySubjectName,
+		RepoName:    bintrayRepoName,
+		PackageName: packageName,
+		Username:    bintrayUsername,
+		APIKey:      bintrayAPIKey}
 }

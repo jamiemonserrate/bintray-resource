@@ -11,17 +11,20 @@ import (
 )
 
 var _ = Describe("CheckCommand", func() {
-	var fakeBintrayClient *fakes.BintrayClient
+	var (
+		fakeBintrayClient *fakes.BintrayClient
+		checkRequest      check.CheckRequest
+	)
 
 	BeforeEach(func() {
 		fakeBintrayClient = &fakes.BintrayClient{
 			VersionsToReturn: []string{"1.0.0", "0.0.2", "0.0.1"},
 		}
+		checkRequest = validCheckRequest()
 	})
 
 	It("Requests for the correct package", func() {
-		checkRequest := check.CheckRequest{Source: bintrayresource.Source{PackageName: "awesome-package"},
-			RawVersion: bintrayresource.Version{Number: "1.0.0"}}
+		checkRequest.Source.PackageName = "awesome-package"
 
 		checkCommand := check.NewCheckCommand(fakeBintrayClient)
 		_, err := checkCommand.Execute(checkRequest)
@@ -31,7 +34,7 @@ var _ = Describe("CheckCommand", func() {
 	})
 
 	It("Returns empty array when the latest version is provided", func() {
-		checkRequest := check.CheckRequest{RawVersion: bintrayresource.Version{Number: "1.0.0"}}
+		checkRequest.RawVersion = bintrayresource.Version{Number: "1.0.0"}
 
 		checkCommand := check.NewCheckCommand(fakeBintrayClient)
 		checkResponse, err := checkCommand.Execute(checkRequest)
@@ -41,7 +44,7 @@ var _ = Describe("CheckCommand", func() {
 	})
 
 	It("Returns all versions greater than the one provided", func() {
-		checkRequest := check.CheckRequest{RawVersion: bintrayresource.Version{Number: "0.0.1"}}
+		checkRequest.RawVersion = bintrayresource.Version{Number: "0.0.1"}
 
 		checkCommand := check.NewCheckCommand(fakeBintrayClient)
 		checkResponse, err := checkCommand.Execute(checkRequest)
@@ -53,12 +56,20 @@ var _ = Describe("CheckCommand", func() {
 	})
 
 	It("Returns error from the client", func() {
-		checkRequest := check.CheckRequest{RawVersion: bintrayresource.Version{Number: "0.0.1"}}
 		fakeBintrayClient.ErrorToBeReturned = errors.New("Some error")
 
 		checkCommand := check.NewCheckCommand(fakeBintrayClient)
 		_, err := checkCommand.Execute(checkRequest)
 
 		Expect(err).To(MatchError("Some error"))
+	})
+
+	It("Returns error when the request is invalid", func() {
+		checkRequest := check.CheckRequest{RawVersion: bintrayresource.Version{Number: ""}}
+
+		checkCommand := check.NewCheckCommand(fakeBintrayClient)
+		_, err := checkCommand.Execute(checkRequest)
+
+		Expect(err).To(MatchError("Please specify the SubjectName"))
 	})
 })

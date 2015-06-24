@@ -1,6 +1,7 @@
 package out
 
 import (
+	"errors"
 	"io/ioutil"
 
 	"github.com/hashicorp/go-version"
@@ -17,6 +18,10 @@ func NewOutCommand(bintrayClient bintray.BintrayClient) OutCommand {
 }
 
 func (outCommand *OutCommand) Execute(outRequest OutRequest) (*OutResponse, error) {
+	if isValid, errMssg := outRequest.IsValid(); !isValid {
+		return nil, errors.New(errMssg)
+	}
+
 	version, err := ioutil.ReadFile(outRequest.VersionFile)
 	if err != nil {
 		return nil, err

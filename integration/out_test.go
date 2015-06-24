@@ -95,14 +95,6 @@ func decodeOutResponse(encodedResponse []byte) out.OutResponse {
 	return decodedResponse
 }
 
-func source() bintrayresource.Source {
-	return bintrayresource.Source{SubjectName: bintraySubjectName,
-		RepoName:    bintrayRepoName,
-		PackageName: packageName,
-		Username:    bintrayUsername,
-		APIKey:      bintrayAPIKey}
-}
-
 func downloadAndReadContentsOf(packageName, version string) string {
 	downloadDir, err := ioutil.TempDir("", "bintray-resource-outtegration-test-download")
 	Expect(err).ToNot(HaveOccurred())

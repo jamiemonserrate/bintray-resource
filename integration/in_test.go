@@ -30,7 +30,7 @@ var _ = Describe("in", func() {
 	It("Downloads file for the version", func() {
 		response := execInCommandWith(in.InRequest{
 			RawVersion: bintrayresource.Version{Number: expectedVersion},
-			Source:     bintrayresource.Source{SubjectName: bintraySubjectName, RepoName: bintrayRepoName, PackageName: packageName},
+			Source:     source(),
 		})
 
 		Expect(response).To(Equal(in.InResponse{Version: bintrayresource.Version{Number: expectedVersion}}))

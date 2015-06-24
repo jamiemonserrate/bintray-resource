@@ -1,6 +1,8 @@
 package check
 
 import (
+	"errors"
+
 	"github.com/hashicorp/go-version"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
 	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
@@ -15,6 +17,10 @@ func NewCheckCommand(bintrayClient bintray.BintrayClient) CheckCommand {
 }
 
 func (checkCommand *CheckCommand) Execute(checkRequest CheckRequest) (CheckResponse, error) {
+	if isValid, errMssg := checkRequest.IsValid(); !isValid {
+		return nil, errors.New(errMssg)
+	}
+
 	bintrayPackage, err := checkCommand.bintrayClient.GetPackage(checkRequest.Source.PackageName)
 
 	if err != nil {

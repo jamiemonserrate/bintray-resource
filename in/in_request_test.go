@@ -1,7 +1,6 @@
 package in_test
 
 import (
-	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 	"github.com/jamiemonserrate/bintray-resource/in"
 
 	. "github.com/onsi/ginkgo"
@@ -41,10 +40,3 @@ var _ = Describe("InRequest", func() {
 		})
 	})
 })
-
-func validInRequest() in.InRequest {
-	return in.InRequest{Source: bintrayresource.Source{SubjectName: "something",
-		RepoName: "something", PackageName: "something",
-		Username: "something", APIKey: "something"},
-		RawVersion: bintrayresource.Version{Number: "something"}}
-}

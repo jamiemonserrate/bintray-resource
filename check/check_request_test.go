@@ -36,9 +36,3 @@ var _ = Describe("CheckRequest", func() {
 		})
 	})
 })
-
-func validCheckRequest() check.CheckRequest {
-	return check.CheckRequest{Source: bintrayresource.Source{SubjectName: "something",
-		RepoName: "something", PackageName: "something",
-		Username: "something", APIKey: "something"}}
-}

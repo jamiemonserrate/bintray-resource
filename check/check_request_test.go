@@ -14,7 +14,8 @@ var _ = Describe("CheckRequest", func() {
 		It("returns version as an object", func() {
 			checkRequest := check.CheckRequest{RawVersion: bintrayresource.Version{Number: "1.1.1"}}
 
-			expectedVersion, _ := version.NewVersion("1.1.1")
+			expectedVersion, err := version.NewVersion("1.1.1")
+			Expect(err).NotTo(HaveOccurred())
 			Expect(checkRequest.Version()).To(Equal(expectedVersion))
 		})
 	})

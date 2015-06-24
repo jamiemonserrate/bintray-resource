@@ -40,8 +40,9 @@ var _ = Describe("InCommand", func() {
 		inRequest.Source.PackageName = "awesome-package"
 
 		inCommand := in.NewInCommand(fakeBintrayClient)
-		inCommand.Execute(inRequest, destDir)
+		_, err := inCommand.Execute(inRequest, destDir)
 
+		Expect(err).ToNot(HaveOccurred())
 		Expect(fakeBintrayClient.PackageNameRequested).To(Equal("awesome-package"))
 		Expect(fakeBintrayClient.VersionRequested).To(Equal("1.0.0"))
 		Expect(fakeBintrayClient.DestinationDirRequested).To(Equal(destDir))
@@ -52,8 +53,9 @@ var _ = Describe("InCommand", func() {
 		Expect(destDir).ToNot(BeAnExistingFile())
 
 		inCommand := in.NewInCommand(fakeBintrayClient)
-		inCommand.Execute(inRequest, destDir)
+		_, err := inCommand.Execute(inRequest, destDir)
 
+		Expect(err).ToNot(HaveOccurred())
 		Expect(destDir).To(BeAnExistingFile())
 	})
 

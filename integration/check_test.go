@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os/exec"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -54,7 +55,7 @@ var _ = Describe("check", func() {
 		Expect(response).To(Equal(check.CheckResponse{{Number: "2.2.3"}}))
 	})
 
-	Context("when an error occurs", func() {
+	Context("when an error occurs while executing command", func() {
 		It("Fails with non zero status code and prints the error", func() {
 			checkRequest := check.CheckRequest{
 				Source: bintrayresource.Source{SubjectName: "nonsense"},
@@ -68,6 +69,20 @@ var _ = Describe("check", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
 			Eventually(buffer).Should(gbytes.Say(`error runningCommand:`))
+		})
+	})
+
+	Context("when cannot decode the input", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			command := exec.Command(checkPath)
+			command.Stdin = strings.NewReader("some nonsense")
+
+			buffer := gbytes.NewBuffer()
+
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
+			Eventually(buffer).Should(gbytes.Say(`invalid character`))
 		})
 	})
 })

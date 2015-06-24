@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
@@ -41,7 +42,7 @@ var _ = Describe("in", func() {
 		Expect(contents).To(Equal([]byte("These contents are valid")))
 	})
 
-	Context("when an error occurs", func() {
+	Context("when an error occurs executing the command", func() {
 		It("Fails with non zero status code and prints the error", func() {
 			inRequest := in.InRequest{
 				Source: bintrayresource.Source{SubjectName: "nonsense"},
@@ -55,6 +56,34 @@ var _ = Describe("in", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
 			Eventually(buffer).Should(gbytes.Say(`error runningCommand:`))
+		})
+	})
+
+	Context("when an error occurs parsing the request", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			command := exec.Command(inPath, tmpDir)
+			command.Stdin = strings.NewReader("some nonsense")
+
+			buffer := gbytes.NewBuffer()
+
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
+			Eventually(buffer).Should(gbytes.Say(`invalid character`))
+		})
+	})
+
+	Context("when insufficient arguments provided", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			command := exec.Command(inPath)
+			command.Stdin = strings.NewReader("doesnt matter")
+
+			buffer := gbytes.NewBuffer()
+
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 5*time.Second).Should(gexec.Exit(1))
+			Eventually(buffer).Should(gbytes.Say(`Please specify destination directory`))
 		})
 	})
 })

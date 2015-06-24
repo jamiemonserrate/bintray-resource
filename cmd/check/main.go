@@ -10,7 +10,10 @@ import (
 )
 
 func main() {
-	checkRequest := decodeJSONFrom(os.Stdin)
+	checkRequest, err := decodeJSONFrom(os.Stdin)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 
 	checkCommand := check.NewCheckCommand(bintray.NewClient(
 		bintray.APIURL,
@@ -24,15 +27,18 @@ func main() {
 		bintrayresource.LogErrorAndExit(err)
 	}
 
-	writeToStdout(checkResponse)
+	err = writeToStdout(checkResponse)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 }
 
-func decodeJSONFrom(request *os.File) check.CheckRequest {
+func decodeJSONFrom(request *os.File) (check.CheckRequest, error) {
 	checkRequest := check.CheckRequest{}
-	json.NewDecoder(request).Decode(&checkRequest)
-	return checkRequest
+	err := json.NewDecoder(request).Decode(&checkRequest)
+	return checkRequest, err
 }
 
-func writeToStdout(response check.CheckResponse) {
-	json.NewEncoder(os.Stdout).Encode(response)
+func writeToStdout(response check.CheckResponse) error {
+	return json.NewEncoder(os.Stdout).Encode(response)
 }

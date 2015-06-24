@@ -10,7 +10,10 @@ import (
 )
 
 func main() {
-	outRequest := decodeJSONFrom(os.Stdin)
+	outRequest, err := decodeJSONFrom(os.Stdin)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 
 	outCommand := out.NewOutCommand(bintray.NewClient(
 		bintray.APIURL,
@@ -24,15 +27,18 @@ func main() {
 		bintrayresource.LogErrorAndExit(err)
 	}
 
-	writeToStdout(outResponse)
+	err = writeToStdout(outResponse)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 }
 
-func decodeJSONFrom(request *os.File) out.OutRequest {
+func decodeJSONFrom(request *os.File) (out.OutRequest, error) {
 	outRequest := out.OutRequest{}
-	json.NewDecoder(request).Decode(&outRequest)
-	return outRequest
+	err := json.NewDecoder(request).Decode(&outRequest)
+	return outRequest, err
 }
 
-func writeToStdout(response *out.OutResponse) {
-	json.NewEncoder(os.Stdout).Encode(response)
+func writeToStdout(response *out.OutResponse) error {
+	return json.NewEncoder(os.Stdout).Encode(response)
 }

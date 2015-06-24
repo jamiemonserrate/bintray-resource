@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 
 	"github.com/jamiemonserrate/bintray-resource/bintray"
@@ -10,7 +11,14 @@ import (
 )
 
 func main() {
-	inRequest := decodeJSONFrom(os.Stdin)
+	if len(os.Args) < 2 {
+		bintrayresource.LogErrorAndExit(errors.New("Please specify destination directory`"))
+	}
+
+	inRequest, err := decodeJSONFrom(os.Stdin)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 
 	inCommand := in.NewInCommand(bintray.NewClient(
 		bintray.DownloadURL,
@@ -25,15 +33,18 @@ func main() {
 		bintrayresource.LogErrorAndExit(err)
 	}
 
-	writeToStdout(inResponse)
+	err = writeToStdout(inResponse)
+	if err != nil {
+		bintrayresource.LogErrorAndExit(err)
+	}
 }
 
-func decodeJSONFrom(request *os.File) in.InRequest {
+func decodeJSONFrom(request *os.File) (in.InRequest, error) {
 	inRequest := in.InRequest{}
-	json.NewDecoder(request).Decode(&inRequest)
-	return inRequest
+	err := json.NewDecoder(request).Decode(&inRequest)
+	return inRequest, err
 }
 
-func writeToStdout(response *in.InResponse) {
-	json.NewEncoder(os.Stdout).Encode(response)
+func writeToStdout(response *in.InResponse) error {
+	return json.NewEncoder(os.Stdout).Encode(response)
 }

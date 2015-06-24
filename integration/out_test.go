@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jamiemonserrate/bintray-resource/bintray"
@@ -52,7 +53,7 @@ var _ = Describe("out", func() {
 		})
 	})
 
-	Context("when an error occurs", func() {
+	Context("when an error occurs executing the command", func() {
 		It("Fails with non zero status code and prints the error", func() {
 			outRequest := out.OutRequest{
 				Source: bintrayresource.Source{SubjectName: "nonsense"},
@@ -66,6 +67,20 @@ var _ = Describe("out", func() {
 			Eventually(session, 50*time.Second).Should(gexec.Exit(1))
 
 			Eventually(buffer).Should(gbytes.Say(`error runningCommand:`))
+		})
+	})
+
+	Context("when an error occurs parsing the request", func() {
+		It("Fails with non zero status code and prints the error", func() {
+			command := exec.Command(outPath)
+			command.Stdin = strings.NewReader("some nonsense")
+
+			buffer := gbytes.NewBuffer()
+			session, err := gexec.Start(command, GinkgoWriter, buffer)
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(session, 50*time.Second).Should(gexec.Exit(1))
+
+			Eventually(buffer).Should(gbytes.Say(`invalid character`))
 		})
 	})
 })

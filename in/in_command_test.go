@@ -59,13 +59,17 @@ var _ = Describe("InCommand", func() {
 		Expect(destDir).To(BeAnExistingFile())
 	})
 
-	It("Returns the version of the file in the response", func() {
+	It("Returns the version of the file and metadata in the response", func() {
 		destDir := filepath.Join(destRootDir, "i-want-to-be-here")
 		inRequest.RawVersion = bintrayresource.Version{Number: "0.0.1"}
 
 		inCommand := in.NewInCommand(fakeBintrayClient)
+		inResponse, _ := inCommand.Execute(inRequest, destDir)
 
-		Expect(inCommand.Execute(inRequest, destDir)).To(Equal(&in.InResponse{bintrayresource.Version{Number: "0.0.1"}}))
+		Expect(inResponse.Version.Number).To(Equal("0.0.1"))
+		metadata := inResponse.Metadata[0]
+		Expect(metadata.Name).To(Equal("url"))
+		Expect(metadata.Value).To(Equal("this-is-the-inpackage-url"))
 	})
 
 	It("Returns error from the client", func() {

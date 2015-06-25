@@ -42,3 +42,7 @@ func (fakeBintrayClient *BintrayClient) UploadPackage(packageName, fileToBeUploa
 	fakeBintrayClient.VersionToBeUploaded = version
 	return nil
 }
+
+func (fakeBintrayClient *BintrayClient) InPackageURL(packageName, version string) string {
+	return "this-is-the-inpackage-url"
+}

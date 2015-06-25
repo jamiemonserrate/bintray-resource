@@ -32,6 +32,7 @@ type BintrayClient interface {
 	GetPackage(packageName string) (*Package, error)
 	DownloadPackage(packageName, version, destinationDir string) error
 	UploadPackage(packageName, from, version string) error
+	InPackageURL(packageName, version string) string
 }
 
 func NewClient(bintrayURL, subjectName, repoName, username, password string) *Client {
@@ -69,7 +70,7 @@ func (client *Client) DownloadPackage(packageName, version, destinationDir strin
 	}
 
 	defer downloadedFile.Close()
-	response, err := http.Get(client.inPackageURL(packageName, version))
+	response, err := http.Get(client.InPackageURL(packageName, version))
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func (client *Client) getPackageURL(packageName string) string {
 	return fmt.Sprintf("%s/%s", client.url, getPackagePath)
 }
 
-func (client *Client) inPackageURL(packageName, version string) string {
+func (client *Client) InPackageURL(packageName, version string) string {
 	downloadPackagePath := path.Join(client.subjectName, client.repoName, version, packageName)
 	return fmt.Sprintf("%s/%s", client.url, downloadPackagePath)
 }

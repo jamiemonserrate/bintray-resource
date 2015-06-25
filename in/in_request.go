@@ -11,7 +11,8 @@ type InRequest struct {
 }
 
 type InResponse struct {
-	Version bintrayresource.Version
+	Version  bintrayresource.Version
+	Metadata []bintrayresource.Metadata
 }
 
 func (inRequest *InRequest) IsValid() (bool, string) {

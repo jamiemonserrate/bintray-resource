@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/jamiemonserrate/bintray-resource/bintray"
+	"github.com/jamiemonserrate/bintray-resource/bintrayresource"
 )
 
 type InCommand struct {
@@ -31,7 +32,12 @@ func (inCommand *InCommand) Execute(inRequest InRequest, destinationDir string) 
 		return nil, err
 	}
 
-	response := &InResponse{Version: inRequest.RawVersion}
+	response := &InResponse{Version: inRequest.RawVersion,
+		Metadata: []bintrayresource.Metadata{
+			bintrayresource.Metadata{Name: "url",
+				Value: inCommand.bintrayClient.InPackageURL(inRequest.Source.PackageName,
+					inRequest.RawVersion.Number)},
+		}}
 	return response, nil
 }
 

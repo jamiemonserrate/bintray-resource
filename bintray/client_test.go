@@ -278,6 +278,14 @@ var _ = Describe("Client", func() {
 			})
 		})
 	})
+
+	Context("InPackageURL", func() {
+		It("Returns the URL of the package to be downloaded", func() {
+			url := client.InPackageURL("packageName", "version")
+
+			Expect(url).To(ContainSubstring("subject_name/repo_name/version/packageName"))
+		})
+	})
 })
 
 func VerifyContentsUploaded(expectedContents string) http.HandlerFunc {

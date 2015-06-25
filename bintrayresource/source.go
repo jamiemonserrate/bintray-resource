@@ -12,6 +12,11 @@ type Version struct {
 	Number string `json:"number"`
 }
 
+type Metadata struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 func (s *Source) IsValid() (bool, string) {
 	if s.SubjectName == "" {
 		return false, "Please specify the SubjectName"

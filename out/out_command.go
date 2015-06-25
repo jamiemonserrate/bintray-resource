@@ -22,17 +22,22 @@ func (outCommand *OutCommand) Execute(outRequest OutRequest) (*OutResponse, erro
 		return nil, errors.New(errMssg)
 	}
 
-	version, err := ioutil.ReadFile(outRequest.VersionFile)
-	if err != nil {
-		return nil, err
-	}
-	err = outCommand.bintrayClient.UploadPackage(outRequest.Source.PackageName,
-		outRequest.From, string(version))
+	ver, err := ioutil.ReadFile(outRequest.VersionFile)
 	if err != nil {
 		return nil, err
 	}
 
-	return &OutResponse{Version: bintrayresource.Version{Number: string(version)}}, nil
+	if _, err := version.NewVersion(string(ver)); err != nil {
+		return nil, err
+	}
+
+	err = outCommand.bintrayClient.UploadPackage(outRequest.Source.PackageName,
+		outRequest.From, string(ver))
+	if err != nil {
+		return nil, err
+	}
+
+	return &OutResponse{Version: bintrayresource.Version{Number: string(ver)}}, nil
 }
 
 func toVersion(versionString string) *version.Version {

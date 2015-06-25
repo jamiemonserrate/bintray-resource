@@ -35,5 +35,23 @@ var _ = Describe("CheckRequest", func() {
 			Expect(isValid).To(BeFalse())
 			Expect(errMessage).To(Equal("Please specify the RepoName"))
 		})
+
+		It("empty version is valid for check request", func() {
+			checkRequest := validCheckRequest()
+			checkRequest.RawVersion.Number = ""
+			isValid, errMessage := checkRequest.IsValid()
+
+			Expect(isValid).To(BeTrue())
+			Expect(errMessage).To(BeEmpty())
+		})
+
+		It("returns false and an error message if version is invalid", func() {
+			checkRequest := validCheckRequest()
+			checkRequest.RawVersion.Number = "invalid"
+			isValid, errMessage := checkRequest.IsValid()
+
+			Expect(isValid).To(BeFalse())
+			Expect(errMessage).To(Equal("Malformed version: invalid"))
+		})
 	})
 })

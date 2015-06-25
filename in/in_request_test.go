@@ -30,12 +30,12 @@ var _ = Describe("InRequest", func() {
 				Expect(errMssg).To(Equal("Please specify the RepoName"))
 			})
 
-			It("returns false and an error message if Version to download is missing", func() {
+			It("returns false and an error message if Version to download is invalid", func() {
 				inRequest.RawVersion.Number = ""
 
 				isValid, errMssg := inRequest.IsValid()
 				Expect(isValid).To(BeFalse())
-				Expect(errMssg).To(Equal("Please specify the Version"))
+				Expect(errMssg).To(Equal("Malformed version: "))
 			})
 		})
 	})

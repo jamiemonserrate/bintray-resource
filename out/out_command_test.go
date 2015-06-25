@@ -82,4 +82,15 @@ var _ = Describe("OutCommand", func() {
 		Expect(err).To(MatchError("Please specify the VersionFile"))
 	})
 
+	It("returns an error when the version provided is invalid", func() {
+		versionFilePath := filepath.Join(tmpDir, "version_file")
+		ioutil.WriteFile(versionFilePath, []byte("invalid"), 0755)
+		outRequest.VersionFile = versionFilePath
+
+		outCommand := out.NewOutCommand(fakeBintrayClient)
+		_, err := outCommand.Execute(outRequest)
+
+		Expect(err).To(MatchError("Malformed version: invalid"))
+	})
+
 })

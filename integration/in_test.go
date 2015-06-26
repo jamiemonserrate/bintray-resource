@@ -34,7 +34,12 @@ var _ = Describe("in", func() {
 			Source:     source(),
 		})
 
-		Expect(response).To(Equal(in.InResponse{Version: bintrayresource.Version{Number: expectedVersion}}))
+		Expect(response).To(Equal(in.InResponse{
+			Version: bintrayresource.Version{Number: expectedVersion},
+			Metadata: []bintrayresource.Metadata{
+				bintrayresource.Metadata{Name: "url",
+					Value: "https://dl.bintray.com/jamiemonserrate/jamie-concourse/2.2.4/cf-artifactory",
+				}}}))
 
 		Expect(filepath.Join(tmpDir, packageName)).To(BeARegularFile())
 		contents, err := ioutil.ReadFile(filepath.Join(tmpDir, packageName))

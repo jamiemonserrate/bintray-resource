@@ -51,6 +51,20 @@ var _ = Describe("OutCommand", func() {
 		Expect(outResponse.Version.Number).To(Equal("6.6.6"))
 	})
 
+	It("Emits metadata", func() {
+		versionFilePath := filepath.Join(tmpDir, "version_file")
+		ioutil.WriteFile(versionFilePath, []byte("6.6.6"), 0755)
+		outRequest.VersionFile = versionFilePath
+
+		outCommand := out.NewOutCommand(fakeBintrayClient)
+		outResponse, err := outCommand.Execute(outRequest)
+		Expect(err).ToNot(HaveOccurred())
+
+		metadata := outResponse.Metadata[0]
+		Expect(metadata.Name).To(Equal("url"))
+		Expect(metadata.Value).To(Equal("this-is-the-inpackage-url"))
+	})
+
 	It("Returns error if cant open file", func() {
 		outRequest.VersionFile = "nonsense"
 		fakeBintrayClient.ErrorToBeReturned = errors.New("Some error")

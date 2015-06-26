@@ -48,7 +48,12 @@ var _ = Describe("out", func() {
 				VersionFile: versionFilePath,
 				Source:      source()})
 
-			Expect(response).To(Equal(out.OutResponse{Version: bintrayresource.Version{Number: expectedVersion}}))
+			Expect(response).To(Equal(out.OutResponse{
+				Version: bintrayresource.Version{Number: expectedVersion},
+				Metadata: []bintrayresource.Metadata{
+					bintrayresource.Metadata{Name: "url",
+						Value: "https://api.bintray.com/jamiemonserrate/jamie-concourse/2.2.5/cf-artifactory",
+					}}}))
 			Expect(downloadAndReadContentsOf(packageName, expectedVersion)).To(Equal("some-content"))
 		})
 	})

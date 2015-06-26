@@ -37,7 +37,11 @@ func (outCommand *OutCommand) Execute(outRequest OutRequest) (*OutResponse, erro
 		return nil, err
 	}
 
-	return &OutResponse{Version: bintrayresource.Version{Number: string(ver)}}, nil
+	return &OutResponse{Version: bintrayresource.Version{Number: string(ver)},
+		Metadata: []bintrayresource.Metadata{
+			bintrayresource.Metadata{Name: "url",
+				Value: outCommand.bintrayClient.InPackageURL(outRequest.Source.PackageName, string(ver)),
+			}}}, nil
 }
 
 func toVersion(versionString string) *version.Version {

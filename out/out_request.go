@@ -9,7 +9,8 @@ type OutRequest struct {
 }
 
 type OutResponse struct {
-	Version bintrayresource.Version
+	Version  bintrayresource.Version
+	Metadata []bintrayresource.Metadata
 }
 
 func (outRequest *OutRequest) IsValid() (bool, string) {
